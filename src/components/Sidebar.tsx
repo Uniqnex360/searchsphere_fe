@@ -1,0 +1,24 @@
+import { Link } from "react-router-dom";
+
+export default function Sidebar() {
+  return (
+    <div className="p-4 space-y-4">
+      <h2 className="text-xl font-bold">Admin</h2>
+
+      <nav className="flex flex-col gap-2">
+        <Link to="/" className="hover:bg-gray-700 p-2 rounded">
+          Dashboard
+        </Link>
+        <Link to="/search" className="hover:bg-gray-700 p-2 rounded">
+          Search
+        </Link>
+        {/* <Link to="/products" className="hover:bg-gray-700 p-2 rounded">
+          Products
+        </Link>
+        <Link to="/settings" className="hover:bg-gray-700 p-2 rounded">
+          Settings
+        </Link> */}
+      </nav>
+    </div>
+  );
+}
