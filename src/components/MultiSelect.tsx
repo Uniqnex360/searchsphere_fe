@@ -8,6 +8,7 @@ interface Props {
   placeholder?: string;
   searchable?: boolean;
   selectAllLabel?: string;
+  singleSelect?: boolean; // new prop to switch modes
 }
 
 export function MultiSelect({
@@ -17,25 +18,34 @@ export function MultiSelect({
   placeholder = "Select...",
   searchable = true,
   selectAllLabel = "Select All",
+  singleSelect = false,
 }: Props) {
   const [isOpen, setIsOpen] = useState(false);
   const [search, setSearch] = useState("");
   const wrapperRef = useRef<HTMLDivElement>(null);
 
+  // Filter options based on search
   const filteredOptions = searchable
     ? options.filter((opt) => opt.toLowerCase().includes(search.toLowerCase()))
     : options;
 
   const allSelected = value.length === options.length;
 
+  // Toggle selection for an option
   const toggleOption = (option: string) => {
-    if (value.includes(option)) {
-      onChange(value.filter((v) => v !== option));
+    if (singleSelect) {
+      onChange([option]); // only allow one selection
+      setIsOpen(false); // close dropdown
     } else {
-      onChange([...value, option]);
+      if (value.includes(option)) {
+        onChange(value.filter((v) => v !== option));
+      } else {
+        onChange([...value, option]);
+      }
     }
   };
 
+  // Toggle select all (only in multi-select mode)
   const toggleSelectAll = () => {
     if (allSelected) {
       onChange([]);
@@ -44,6 +54,7 @@ export function MultiSelect({
     }
   };
 
+  // Close dropdown on outside click
   useEffect(() => {
     function handleClickOutside(event: MouseEvent) {
       if (
@@ -61,7 +72,7 @@ export function MultiSelect({
   const remainingCount = value.length - 2;
 
   return (
-    <div className="relative min-w-[240px] w-ft" ref={wrapperRef}>
+    <div className="relative min-w-[240px] w-full" ref={wrapperRef}>
       {/* Input Box */}
       <div
         className="flex items-center gap-1 w-full px-3 py-2 border border-gray-300 rounded-lg cursor-pointer bg-white overflow-hidden"
@@ -75,6 +86,7 @@ export function MultiSelect({
           {visibleValues.map((val) => (
             <span
               key={val}
+              title={val} // tooltip on hover
               className="flex items-center gap-1 px-2 py-1 text-xs bg-blue-100 text-blue-700 rounded max-w-[120px] truncate"
             >
               <span className="truncate">{val}</span>
@@ -89,7 +101,7 @@ export function MultiSelect({
             </span>
           ))}
 
-          {remainingCount > 0 && (
+          {remainingCount > 0 && !singleSelect && (
             <span className="text-xs text-gray-500 flex-shrink-0 whitespace-nowrap">
               +{remainingCount} more
             </span>
@@ -116,14 +128,18 @@ export function MultiSelect({
             </div>
           )}
 
-          <div
-            className="px-3 py-2 text-sm cursor-pointer hover:bg-blue-50 flex items-center gap-2 border-b"
-            onClick={toggleSelectAll}
-          >
-            <input type="checkbox" readOnly checked={allSelected} />
-            {selectAllLabel}
-          </div>
+          {/* Select All only in multi-select mode */}
+          {!singleSelect && (
+            <div
+              className="px-3 py-2 text-sm cursor-pointer hover:bg-blue-50 flex items-center gap-2 border-b"
+              onClick={toggleSelectAll}
+            >
+              <input type="checkbox" readOnly checked={allSelected} />
+              {selectAllLabel}
+            </div>
+          )}
 
+          {/* Options */}
           {filteredOptions.map((option) => (
             <div
               key={option}
