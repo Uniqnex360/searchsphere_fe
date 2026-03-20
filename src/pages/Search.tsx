@@ -10,6 +10,7 @@ export default function Search() {
     brands: [] as string[],
     category: [] as string[],
     price: [] as string[],
+    sortBy: "" as string,
   });
 
   const [brands, setBrands] = useState<string[]>([]);
@@ -52,6 +53,7 @@ export default function Search() {
   // Fetch products
   const { data, isLoading, isError } = useQuery({
     queryKey: ["products", filters],
+    //@ts-ignore
     queryFn: () => fetchProducts({ ...filters, price: apiPriceFilter }),
   });
 
@@ -103,13 +105,32 @@ export default function Search() {
             placeholder="Filter by price"
             singleSelect={true}
           />
+          {/* Sort dropdown (single-select) */}
+          <MultiSelect
+            options={[
+              "Product Name (A → Z)",
+              "Product Name (Z → A)",
+              "Price (Low → High)",
+              "Price (High → Low)",
+            ]}
+            value={filters.sortBy ? [filters.sortBy] : []} // pass as array
+            onChange={(newSortArray) =>
+              setFilters((prev) => ({
+                ...prev,
+                sortBy: newSortArray[0] || "",
+              }))
+            }
+            placeholder="Sort by"
+            singleSelect={true}
+          />
         </div>
         {/* Single Clear All button */}
         <div className="flex justify-end mr-4">
           {(filters.q ||
             filters.brands.length > 0 ||
             filters.category.length > 0 ||
-            (filters.price && filters.price.length > 0)) && (
+            (filters.price && filters.price.length > 0) ||
+            filters.sortBy) && (
             <button
               className="ml-auto px-3 py-1 text-[12px]  text-red-700 hover:text-red-900 rounded transition cursor-pointer"
               onClick={() => {
@@ -118,6 +139,7 @@ export default function Search() {
                   brands: [],
                   category: [],
                   price: [],
+                  sortBy: "",
                 });
               }}
             >
