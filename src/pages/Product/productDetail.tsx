@@ -167,6 +167,7 @@ const ProductDetail: React.FC<ProductDetailProps> = ({ mode }) => {
               placeholder="Enter product name"
               register={register}
               rules={{ required: "Product Name is required" }}
+              //@ts-ignore
               error={formState.errors.product_name}
               formState={formState}
               type="text"
@@ -194,6 +195,7 @@ const ProductDetail: React.FC<ProductDetailProps> = ({ mode }) => {
                 placeholder="Enter Category"
                 register={register}
                 rules={{ required: "Category is required" }}
+                //@ts-ignore
                 error={formState.errors.category}
                 formState={formState}
                 type="text"
@@ -207,6 +209,7 @@ const ProductDetail: React.FC<ProductDetailProps> = ({ mode }) => {
                 placeholder="Enter Industry"
                 register={register}
                 rules={{ required: "Industry is required" }}
+                //@ts-ignore
                 error={formState.errors.industry}
                 formState={formState}
                 type="text"

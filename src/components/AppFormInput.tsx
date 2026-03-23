@@ -19,6 +19,7 @@ interface AppFormInputProps<T extends FieldValues> {
   placeholder?: string;
   register: UseFormRegister<T>;
   rules?: RegisterOptions<T, Path<T>>;
+  //@ts-ignore
   error?: FieldError;
   className?: string;
   formState?: UseFormStateReturn<T>;

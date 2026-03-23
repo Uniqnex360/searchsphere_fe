@@ -126,6 +126,7 @@ export function AutoComplete({
             data.map((item, index) => (
               <div
                 key={item.id}
+                //@ts-ignore
                 ref={(el) => (itemRefs.current[index] = el)}
                 onClick={() => {
                   onSelect(item);
