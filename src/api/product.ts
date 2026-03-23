@@ -40,7 +40,13 @@ export const fetchProducts = async (filters: {
   const res = await api.get("/product/vector/auto-complete/", { params });
   return res.data;
 };
+
 export const fetchProductsFilterMeta = async () => {
   const res = await api.get("/product/filter-meta/");
+  return res.data;
+};
+
+export const fetchProductDetail = async (id: number | string) => {
+  const res = await api.get(`product/detail/${id}/`);
   return res.data;
 };

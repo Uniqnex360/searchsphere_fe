@@ -1,10 +1,12 @@
 import { useState, useEffect } from "react";
 import { useQuery } from "@tanstack/react-query";
+import { useNavigate } from "react-router-dom";
 import { AutoComplete } from "../components/AutoComplete";
 import { MultiSelect } from "../components/MultiSelect";
 import { fetchProducts, fetchProductsFilterMeta } from "../api/product";
 
 export default function Search() {
+  const navigate = useNavigate();
   const [filters, setFilters] = useState({
     q: "",
     brands: [] as string[],
@@ -30,13 +32,13 @@ export default function Search() {
       const priceOpts =
         res?.price_ranges?.map((range: any) => ({
           ...range,
-          label: `₹${range.min.toLocaleString()} - ₹${range.max.toLocaleString()}`,
+          label: `$${range.min.toLocaleString()} - $${range.max.toLocaleString()}`,
         })) || [];
       setPriceRanges(priceOpts);
     })();
   }, []);
 
-  // Prepare API-ready price filter
+
   // Prepare API-ready price filter
   const apiPriceFilter =
     Array.isArray(filters.price) && filters.price.length
@@ -158,7 +160,11 @@ export default function Search() {
 
         <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4 mt-4">
           {data?.data?.map((product: any) => (
-            <div key={product.id} className="bg-white rounded-xl shadow-sm p-4">
+            <div
+              key={product.id}
+              className="bg-white rounded-xl shadow-sm p-4 cursor-pointer"
+              onClick={() => navigate(`/product/detail/${product.id}`)}
+            >
               <div className="w-full h-64 overflow-hidden rounded-lg">
                 {product.images?.[0] ? (
                   <img
@@ -178,7 +184,7 @@ export default function Search() {
               <p className="text-sm text-gray-500">{product.brand}</p>
               <p className="text-sm text-green-600">{product.category}</p>
               <p className="text-blue-600 font-bold mt-2">
-                ₹{product.base_price}
+                ${product.base_price}
               </p>
             </div>
           ))}

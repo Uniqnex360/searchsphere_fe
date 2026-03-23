@@ -9,8 +9,8 @@ export default function Sidebar() {
         <Link to="/" className="hover:bg-gray-700 p-2 rounded">
           Dashboard
         </Link>
-        <Link to="/search" className="hover:bg-gray-700 p-2 rounded">
-          Search
+        <Link to="/product" className="hover:bg-gray-700 p-2 rounded">
+          Product
         </Link>
         {/* <Link to="/products" className="hover:bg-gray-700 p-2 rounded">
           Products

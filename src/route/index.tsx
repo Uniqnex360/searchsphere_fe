@@ -1,9 +1,10 @@
 import { createBrowserRouter } from "react-router-dom";
-import Layout from "./components/Layout";
-import Dashboard from "./pages/Dashboard";
-import Products from "./pages/Products";
-import Settings from "./pages/Settings";
-import Search from "./pages/Search";
+import Layout from "../components/Layout";
+import Dashboard from "../pages/Dashboard";
+import Products from "../pages/Products";
+import Settings from "../pages/Settings";
+import Search from "../pages/Search";
+import { productRoutes } from "./product";
 
 export const router = createBrowserRouter([
   {
@@ -13,7 +14,8 @@ export const router = createBrowserRouter([
       { index: true, element: <Dashboard /> },
       { path: "products", element: <Products /> },
       { path: "settings", element: <Settings /> },
-      { path: "search", element: <Search /> },
+      { path: "product", element: <Search /> },
+      ...productRoutes,
     ],
   },
 ]);
