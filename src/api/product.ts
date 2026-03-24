@@ -37,7 +37,8 @@ export const fetchProducts = async (filters: {
     params.sort_order = "desc";
   }
 
-  const res = await api.get("/product/vector/auto-complete/", { params });
+  // const res = await api.get("/product/vector/auto-complete/", { params });
+  const res = await api.get("product/v3/auto-complete/", { params });
   return res.data;
 };
 

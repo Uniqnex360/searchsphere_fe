@@ -90,14 +90,16 @@ export function MultiSelect({
               className="flex items-center gap-1 px-2 py-1 text-xs bg-blue-100 text-blue-700 rounded max-w-[120px] truncate"
             >
               <span className="truncate">{val}</span>
-              <X
-                size={12}
-                className="cursor-pointer flex-shrink-0"
-                onClick={(e) => {
-                  e.stopPropagation();
-                  toggleOption(val);
-                }}
-              />
+              {!singleSelect && (
+                <X
+                  size={12}
+                  className="cursor-pointer flex-shrink-0"
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    toggleOption(val);
+                  }}
+                />
+              )}
             </span>
           ))}
 

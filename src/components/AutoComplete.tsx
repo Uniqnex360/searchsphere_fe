@@ -121,7 +121,7 @@ export function AutoComplete({
           className={`absolute z-50 mt-1 w-full bg-white border rounded-md shadow-lg max-h-60 overflow-auto ${dropdownClassName}`}
         >
           {data.length === 0 ? (
-            <div className="p-2 text-sm text-gray-500">No results found.</div>
+            <div className="p-2 text-sm text-gray-500">Search Products</div>
           ) : (
             data.map((item, index) => (
               <div

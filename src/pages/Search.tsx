@@ -7,6 +7,8 @@ import { fetchProducts, fetchProductsFilterMeta } from "../api/product";
 
 export default function Search() {
   const navigate = useNavigate();
+
+  // === Filters State ===
   const [filters, setFilters] = useState({
     q: "",
     brands: [] as string[],
@@ -21,14 +23,13 @@ export default function Search() {
     { min: number; max: number; label: string }[]
   >([]);
 
-  // Fetch filter metadata
+  // === Fetch filter metadata on mount ===
   useEffect(() => {
     (async () => {
       const res = await fetchProductsFilterMeta();
       setBrands(res?.brands || []);
       setCategory(res?.categories || []);
 
-      // Convert backend price ranges to label strings
       const priceOpts =
         res?.price_ranges?.map((range: any) => ({
           ...range,
@@ -38,8 +39,22 @@ export default function Search() {
     })();
   }, []);
 
+  // === AutoComplete / Search Suggestions ===
+  const [searchTerm, setSearchTerm] = useState("");
+  const [debouncedSearchTerm, setDebouncedSearchTerm] = useState(searchTerm);
 
-  // Prepare API-ready price filter
+  useEffect(() => {
+    const handler = setTimeout(() => setDebouncedSearchTerm(searchTerm), 200);
+    return () => clearTimeout(handler);
+  }, [searchTerm]);
+
+  const { data: suggestions } = useQuery({
+    queryKey: ["products-suggestions", debouncedSearchTerm],
+    enabled: !!debouncedSearchTerm,
+    queryFn: () => fetchProducts({ q: debouncedSearchTerm }),
+  });
+
+  // === Product List API ===
   const apiPriceFilter =
     Array.isArray(filters.price) && filters.price.length
       ? filters.price
@@ -52,26 +67,34 @@ export default function Search() {
           .filter(Boolean)
       : [];
 
-  // Fetch products
-  const { data, isLoading, isError } = useQuery({
+  const {
+    data: productList,
+    isLoading,
+    isError,
+    refetch,
+  } = useQuery({
     queryKey: ["products", filters],
     //@ts-ignore
     queryFn: () => fetchProducts({ ...filters, price: apiPriceFilter }),
   });
+
+  // === Handle Search Submission ===
+  const handleSearchSubmit = (q: string) => {
+    setFilters((prev) => ({ ...prev, q }));
+    refetch(); // fetch product list based on search
+  };
 
   return (
     <div className="flex flex-col h-screen w-full bg-gray-50">
       {/* Header + Filters */}
       <div className="bg-white shadow-sm sticky top-0 z-50">
         <div className="h-[65px] flex items-center px-5">
-          <div className="w-full md:w-1/2">
+          <div className="w-full md:w-3/4">
             <AutoComplete
-              data={data?.data || []}
-              value={filters.q}
-              onChange={(val) => setFilters((prev) => ({ ...prev, q: val }))}
-              onSelect={(item) => {
-                setFilters((prev) => ({ ...prev, q: item.name }));
-              }}
+              data={suggestions?.data?.results || []} // dynamic suggestions
+              value={searchTerm}
+              onChange={(val) => setSearchTerm(val)}
+              onSelect={(item) => handleSearchSubmit(item.name)}
               placeholder="Search products..."
               inputClassName="rounded-lg text-lg"
               dropdownClassName="rounded-lg shadow-lg"
@@ -105,9 +128,8 @@ export default function Search() {
               setFilters((prev) => ({ ...prev, price: newPrice }))
             }
             placeholder="Filter by price"
-            singleSelect={true}
+            singleSelect
           />
-          {/* Sort dropdown (single-select) */}
           <MultiSelect
             options={[
               "Product Name (A → Z)",
@@ -115,26 +137,30 @@ export default function Search() {
               "Price (Low → High)",
               "Price (High → Low)",
             ]}
-            value={filters.sortBy ? [filters.sortBy] : []} // pass as array
+            value={filters.sortBy ? [filters.sortBy] : []}
             onChange={(newSortArray) =>
-              setFilters((prev) => ({
-                ...prev,
-                sortBy: newSortArray[0] || "",
-              }))
+              setFilters((prev) => ({ ...prev, sortBy: newSortArray[0] || "" }))
             }
             placeholder="Sort by"
-            singleSelect={true}
+            singleSelect
           />
         </div>
-        {/* Single Clear All button */}
         <div className="flex justify-end mr-4">
-          {(filters.q ||
-            filters.brands.length > 0 ||
-            filters.category.length > 0 ||
-            (filters.price && filters.price.length > 0) ||
-            filters.sortBy) && (
+          <p className="italic text-sm text-gray-400 float-end px-3 py-1">
+            Total: {productList?.data?.total_docs_after_filter}
+          </p>
+        </div>
+
+        {/* Clear Filters */}
+        {(searchTerm ||
+          filters.q ||
+          filters.brands.length > 0 ||
+          filters.category.length > 0 ||
+          (filters.price && filters.price.length > 0) ||
+          filters.sortBy) && (
+          <div className="flex justify-end mr-4">
             <button
-              className="ml-auto px-3 py-1 text-[12px]  text-red-700 hover:text-red-900 rounded transition cursor-pointer"
+              className="ml-auto px-3 py-1 text-[12px] text-red-700 hover:text-red-900 rounded transition cursor-pointer"
               onClick={() => {
                 setFilters({
                   q: "",
@@ -143,12 +169,13 @@ export default function Search() {
                   price: [],
                   sortBy: "",
                 });
+                setSearchTerm("");
               }}
             >
               Clear All
             </button>
-          )}
-        </div>
+          </div>
+        )}
       </div>
 
       {/* Product List */}
@@ -159,7 +186,7 @@ export default function Search() {
         )}
 
         <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4 mt-4">
-          {data?.data?.map((product: any) => (
+          {productList?.data?.results?.map((product: any) => (
             <div
               key={product.id}
               className="bg-white rounded-xl shadow-sm p-4 cursor-pointer"
@@ -190,7 +217,7 @@ export default function Search() {
           ))}
         </div>
 
-        {!isLoading && data?.data?.length === 0 && (
+        {!isLoading && productList?.data?.length === 0 && (
           <div className="text-center text-gray-500 mt-10">
             No products found
           </div>
