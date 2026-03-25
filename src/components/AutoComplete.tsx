@@ -85,16 +85,31 @@ export function AutoComplete({
       setHighlightedIndex((prev) => (prev > 0 ? prev - 1 : 0));
     }
 
+    // if (e.key === "Enter") {
+    //   e.preventDefault();
+
+    //   if (data[highlightedIndex]) {
+    //     onSelect(data[highlightedIndex]);
+    //     setOpen(false);
+    //   } else if (value.trim()) {
+    //     console.log("Entered value:", value);
+    //     setOpen(false);
+    //   }
+    // }
     if (e.key === "Enter") {
       e.preventDefault();
 
       if (data[highlightedIndex]) {
-        onSelect(data[highlightedIndex]);
-        setOpen(false);
+        onSelect(data[highlightedIndex]); // existing behavior
       } else if (value.trim()) {
-        console.log("Entered value:", value);
-        setOpen(false);
+        // 🔥 trigger search from input itself
+        onSelect({
+          id: value,
+          name: value,
+        });
       }
+
+      setOpen(false);
     }
   };
 

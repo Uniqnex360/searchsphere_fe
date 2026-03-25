@@ -7,17 +7,20 @@ export const fetchProducts = async (filters: {
   category?: string[];
   price?: { price_min: number; price_max: number }[];
   sortBy?: string;
+  page?: number
 }) => {
   const params: any = {};
   if (filters.q) params.q = filters.q;
   if (filters.brands?.length) params.brand = filters.brands;
   if (filters.category?.length) params.category = filters.category;
+  if (filters.page) params.page = filters.page;
 
   if (filters.price?.length) {
     const selectedRange = filters.price[0]; // take the first selected range
     params.price_min = selectedRange.price_min;
     params.price_max = selectedRange.price_max;
   }
+
 
   // -----------------------------
   // Sort map
