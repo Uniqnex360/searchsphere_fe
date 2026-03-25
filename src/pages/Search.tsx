@@ -1,17 +1,20 @@
 import { useState, useEffect } from "react";
+import { List, LayoutGrid } from "lucide-react";
 import { useQuery } from "@tanstack/react-query";
 import { useNavigate, useSearchParams } from "react-router-dom";
 import { AutoComplete } from "../components/AutoComplete";
 import { MultiSelect } from "../components/MultiSelect";
 import { fetchProducts, fetchProductsFilterMeta } from "../api/product";
 import AppPagination from "../components/AppPagination";
+import AppTable from "../components/AppTable";
+import type { ProductType } from "../types/product";
 
 export default function Search() {
   const navigate = useNavigate();
 
   const [searchParams, setSearchParams] = useSearchParams();
   const params = Object.fromEntries(searchParams.entries());
-
+  const [gridView, setGridView] = useState(false);
   // ===============================
   // URL STATE (source of truth)
   // ===============================
@@ -132,6 +135,70 @@ export default function Search() {
     setSearchQuery(value); // 🔥 THIS triggers product API
   };
 
+  const columns = [
+    // {
+    //   key: "selection",
+    //   label: (
+    //     <input
+    //       type="checkbox"
+    //       checked={
+    //         selectedAssets.size === filteredAssets.length &&
+    //         filteredAssets.length > 0
+    //       }
+    //       onChange={toggleSelectAll}
+    //       className="w-4 h-4 rounded border-gray-300 text-blue-600 focus:ring-blue-500"
+    //     />
+    //   ) as any,
+    //   render: (_: any, row: DigitalAsset) => (
+    //     <div onClick={(e) => e.stopPropagation()}>
+    //       <input
+    //         type="checkbox"
+    //         checked={selectedAssets.has(row)}
+    //         onChange={() => toggleSelect(row)}
+    //         className="w-4 h-4 rounded cursor-pointer border-gray-300 text-blue-600 focus:ring-blue-500"
+    //       />
+    //     </div>
+    //   ),
+    //   width: "80px",
+    // },
+    {
+      key: "image",
+      label: "Image",
+      render: (_: any, row: ProductType) => {
+        const imageUrl =
+          Array.isArray(row?.images) && row.images.length > 0
+            ? row.images[0]
+            : null;
+
+        if (imageUrl) {
+          return (
+            <img
+              //@ts-ignore
+              src={imageUrl}
+              alt={row.product_name || "Asset Image"}
+              style={{
+                width: 50,
+                height: 50,
+                objectFit: "cover",
+                borderRadius: 4,
+              }}
+            />
+          );
+        }
+
+        return "--";
+      },
+    },
+    {
+      key: "name",
+      label: "Name",
+      customTruncate: true,
+      truncateLength: 40,
+    },
+    { key: "brand", label: "Brand" },
+    { key: "category", label: "Category" },
+  ];
+
   return (
     <div className="flex flex-col h-screen w-full bg-gray-50">
       {/* HEADER */}
@@ -151,6 +218,32 @@ export default function Search() {
               placeholder="Search products..."
               inputClassName="rounded-lg text-lg"
             />
+          </div>
+          <div className="w-1/4 float-right">
+            {/* list grid view toggle */}
+            <div className="flex items-center justify-end mx-4 space-x-2">
+              <button
+                onClick={() => setGridView(!gridView)}
+                className={`p-2 rounded flex items-center justify-center transition-colors ${
+                  !gridView
+                    ? "bg-blue-500 text-white"
+                    : "bg-gray-100 hover:bg-gray-200"
+                }`}
+              >
+                <List size={20} />
+              </button>
+
+              <button
+                onClick={() => setGridView(!gridView)}
+                className={`p-2 rounded flex items-center justify-center transition-colors ${
+                  gridView
+                    ? "bg-blue-500 text-white"
+                    : "bg-gray-100 hover:bg-gray-200"
+                }`}
+              >
+                <LayoutGrid size={20} />
+              </button>
+            </div>
           </div>
         </div>
 
@@ -236,27 +329,42 @@ export default function Search() {
       </div>
 
       {/* PRODUCTS */}
-      <div className="flex-1 overflow-y-auto p-5">
-        {isLoading && <div>Loading...</div>}
-        {isError && <div>Failed to load</div>}
 
-        <div className="grid grid-cols-4 gap-4 mt-4">
-          {productList?.data?.results?.map((p: any) => (
-            <div
-              key={p.id}
-              className="bg-white p-4 rounded-xl cursor-pointer"
-              onClick={() => navigate(`/product/detail/${p.id}`)}
-            >
-              <img
-                src={p.images?.[0]}
-                className="h-48 w-full object-cover rounded"
-              />
-              <div className="mt-2 font-semibold">{p.name}</div>
-              <div className="text-sm text-gray-500">{p.brand}</div>
+      {gridView ? (
+        <>
+          <div className="flex-1 overflow-y-auto p-5">
+            {isLoading && <div>Loading...</div>}
+            {isError && <div>Failed to load</div>}
+
+            <div className="grid grid-cols-4 gap-4 mt-4">
+              {productList?.data?.results?.map((p: any) => (
+                <div
+                  key={p.id}
+                  className="bg-white p-4 rounded-xl cursor-pointer"
+                  onClick={() => navigate(`/product/detail/${p.id}`)}
+                >
+                  <img
+                    src={p.images?.[0]}
+                    className="h-48 w-full object-cover rounded"
+                  />
+                  <div className="mt-2 font-semibold">{p.name}</div>
+                  <div className="text-sm text-gray-500">{p.brand}</div>
+                </div>
+              ))}
             </div>
-          ))}
-        </div>
-      </div>
+          </div>
+        </>
+      ) : (
+        <>
+          <div className="flex-1 overflow-y-auto p-5">
+            <AppTable
+              columns={columns}
+              data={productList?.data?.results}
+              isLoading={isLoading}
+            />
+          </div>
+        </>
+      )}
     </div>
   );
 }
