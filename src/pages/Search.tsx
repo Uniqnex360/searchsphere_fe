@@ -22,7 +22,7 @@ export default function Search() {
     q: params.q || "",
     brands: params.brands ? params.brands.split(",") : [],
     category: params.category ? params.category.split(",") : [],
-    price: params.price ? params.price.split(",") : [],
+    price: params.price ? [params.price] : [],
     sortBy: params.sortBy || "",
   };
 
@@ -90,22 +90,10 @@ export default function Search() {
         q: debouncedInput,
         brands: filters.brands,
         category: filters.category,
+        //@ts-ignore
+        price: filters.price,
       }),
   });
-
-  // ===============================
-  // PRICE TRANSFORM
-  // ===============================
-  const apiPriceFilter =
-    filters.price.length > 0
-      ? filters.price
-          .map((label) => {
-            const r = priceRanges.find((x) => x.label === label);
-            return r ? { price_min: r.min, price_max: r.max } : null;
-          })
-          .filter(Boolean)
-      : [];
-
   // ===============================
   // PRODUCT LIST (ONLY searchQuery triggers it)
   // ===============================
@@ -120,7 +108,7 @@ export default function Search() {
         ...filters,
         q: searchQuery,
         //@ts-ignore
-        price: apiPriceFilter,
+        price: filters.price,
         page,
       }),
   });
@@ -204,8 +192,8 @@ export default function Search() {
       // customTruncate: true,
       // truncateLength: 48,
     },
-    { key: "brand", label: "Brand", width:"150px"},
-    { key: "category", label: "Category",},
+    { key: "brand", label: "Brand", width: "150px" },
+    { key: "category", label: "Category" },
     {
       key: "actions",
       label: "Actions",
@@ -213,10 +201,10 @@ export default function Search() {
       sortable: false,
       render: (_: any, row: ProductType) => (
         <div
-        onClick={() => navigate(`/product/detail/${row.id}`)} 
-        className="flex items-center gap-2 cursor-pointer justify-center">
+          onClick={() => navigate(`/product/detail/${row.id}`)}
+          className="flex items-center gap-2 cursor-pointer justify-center"
+        >
           <button
-            
             className="p-1 hover:bg-gray-100 text-gray-600 rounded transition-colors cursor-pointer"
             title="View"
           >
@@ -378,7 +366,9 @@ export default function Search() {
                     className="h-48 w-full object-cover rounded"
                   />
                   <div className="mt-2 font-semibold">{p.name}</div>
+                  <div className="text-lg text-green-700"> $ {p.base_price || "--"}</div>
                   <div className="text-sm text-gray-500">{p.brand}</div>
+                  <div className="text-sm text-gray-500">{p.category}</div>
                 </div>
               ))}
             </div>

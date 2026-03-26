@@ -5,22 +5,36 @@ export const fetchProducts = async (filters: {
   q?: string;
   brands?: string[];
   category?: string[];
-  price?: { price_min: number; price_max: number }[];
+  price?: string[]; // now accepts labels like "$50 - $12,837.5"
   sortBy?: string;
-  page?: number
+  page?: number;
 }) => {
+  console.log("price", filters.price);
+
   const params: any = {};
   if (filters.q) params.q = filters.q;
   if (filters.brands?.length) params.brand = filters.brands;
   if (filters.category?.length) params.category = filters.category;
   if (filters.page) params.page = filters.page;
 
+  // ===============================
+  // HANDLE PRICE LABELS
+  // ===============================
   if (filters.price?.length) {
-    const selectedRange = filters.price[0]; // take the first selected range
-    params.price_min = selectedRange.price_min;
-    params.price_max = selectedRange.price_max;
-  }
+    // Take the first selected price label (singleSelect)
+    const label = filters.price[0];
 
+    // Parse numbers from string
+    // Example: "$50 - $12,837.5" -> ["50", "12837.5"]
+    const numbers = label
+      .match(/[\d,.]+/g)
+      ?.map((n) => Number(n.replace(/,/g, "")));
+
+    if (numbers && numbers.length === 2) {
+      params.price_min = numbers[0];
+      params.price_max = numbers[1];
+    }
+  }
 
   // -----------------------------
   // Sort map
@@ -40,8 +54,12 @@ export const fetchProducts = async (filters: {
     params.sort_order = "desc";
   }
 
-  // const res = await api.get("/product/vector/auto-complete/", { params });
-  const res = await api.get("product/v3/auto-complete/", { params });
+  const res = await api.get("product/v3/auto-complete/", {
+    params,
+    headers: {
+      "X-FE-URL": window.location.href,
+    },
+  });
   return res.data;
 };
 
