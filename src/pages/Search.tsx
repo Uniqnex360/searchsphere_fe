@@ -44,7 +44,9 @@ export default function Search() {
   // ===============================
   // FILTER META
   // ===============================
+  //@ts-ignore
   const [brands, setBrands] = useState<string[]>([]);
+  //@ts-ignore
   const [category, setCategory] = useState<string[]>([]);
   const [priceRanges, setPriceRanges] = useState<
     { min: number; max: number; label: string }[]
