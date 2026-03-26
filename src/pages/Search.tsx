@@ -1,5 +1,5 @@
 import { useState, useEffect } from "react";
-import { List, LayoutGrid } from "lucide-react";
+import { List, LayoutGrid, Eye } from "lucide-react";
 import { useQuery } from "@tanstack/react-query";
 import { useNavigate, useSearchParams } from "react-router-dom";
 import { AutoComplete } from "../components/AutoComplete";
@@ -80,9 +80,15 @@ export default function Search() {
   }, [searchInput]);
 
   const { data: suggestions } = useQuery({
-    queryKey: ["suggestions", debouncedInput],
-    enabled: !!debouncedInput,
-    queryFn: () => fetchProducts({ q: debouncedInput }),
+    queryKey: ["suggestions", debouncedInput, filters.brands, filters.category],
+    enabled: true,
+    // enabled: !!debouncedInput,
+    queryFn: () =>
+      fetchProducts({
+        q: debouncedInput,
+        brands: filters.brands,
+        category: filters.category,
+      }),
   });
 
   // ===============================
@@ -164,6 +170,7 @@ export default function Search() {
     {
       key: "image",
       label: "Image",
+      width: "100px",
       render: (_: any, row: ProductType) => {
         const imageUrl =
           Array.isArray(row?.images) && row.images.length > 0
@@ -192,11 +199,30 @@ export default function Search() {
     {
       key: "name",
       label: "Name",
-      customTruncate: true,
-      truncateLength: 40,
+      // customTruncate: true,
+      // truncateLength: 48,
     },
-    { key: "brand", label: "Brand" },
-    { key: "category", label: "Category" },
+    { key: "brand", label: "Brand", width:"150px"},
+    { key: "category", label: "Category",},
+    {
+      key: "actions",
+      label: "Actions",
+      width: "100px",
+      sortable: false,
+      render: (_: any, row: ProductType) => (
+        <div
+        onClick={() => navigate(`/product/detail/${row.id}`)} 
+        className="flex items-center gap-2 cursor-pointer justify-center">
+          <button
+            
+            className="p-1 hover:bg-gray-100 text-gray-600 rounded transition-colors cursor-pointer"
+            title="View"
+          >
+            <Eye size={16} />
+          </button>
+        </div>
+      ),
+    },
   ];
 
   return (
@@ -250,14 +276,16 @@ export default function Search() {
         {/* FILTERS */}
         <div className="flex items-center gap-4 px-5 pb-4">
           <MultiSelect
-            options={brands}
+            // options={brands}
+            options={suggestions?.data?.facets?.brands || []}
             value={filters.brands}
             onChange={(v) => updateParams({ brands: v.join(","), page: "1" })}
             placeholder="Filter by brands"
           />
 
           <MultiSelect
-            options={category}
+            // options={category}
+            options={suggestions?.data?.facets?.categories || []}
             value={filters.category}
             onChange={(v) => updateParams({ category: v.join(","), page: "1" })}
             placeholder="Filter by category"
