@@ -12,6 +12,9 @@ export default function Sidebar() {
         <Link to="/product" className="hover:bg-gray-700 p-2 rounded">
           Product
         </Link>
+        <Link to="/product/search/keyword" className="hover:bg-gray-700 p-2 rounded">
+          Keywords
+        </Link>
         {/* <Link to="/products" className="hover:bg-gray-700 p-2 rounded">
           Products
         </Link>

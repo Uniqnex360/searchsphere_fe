@@ -35,19 +35,32 @@ export default function AppTable({
     if (divRef.current) {
       const top = divRef.current.getBoundingClientRect().top;
       const windowHeight = window.innerHeight;
-      setHeight(Math.floor(windowHeight - top)); // remaining height
+      setHeight(Math.floor(windowHeight - top));
     }
   };
 
   useEffect(() => {
-    updateHeight(); // calculate on mount
-    window.addEventListener("resize", updateHeight); // recalc on resize
+    updateHeight();
+    window.addEventListener("resize", updateHeight);
     return () => window.removeEventListener("resize", updateHeight);
   }, [data]);
 
   const truncateText = (text: string, maxLength: number) => {
     if (!text) return "-";
     return text.length > maxLength ? text.slice(0, maxLength) + "…" : text;
+  };
+
+  const getNestedValue = (obj: any, path: string) => {
+    return path.split(".").reduce((acc, key) => {
+      if (typeof acc === "string") {
+        try {
+          acc = JSON.parse(acc);
+        } catch {
+          return undefined;
+        }
+      }
+      return acc?.[key];
+    }, obj);
   };
 
   if (isLoading) {
@@ -104,6 +117,7 @@ export default function AppTable({
                 ))}
               </tr>
             </thead>
+
             <tbody className="bg-white divide-y divide-gray-200">
               {data.length === 0 ? (
                 <tr>
@@ -120,27 +134,31 @@ export default function AppTable({
                     key={index}
                     className="hover:bg-gray-50 transition-colors"
                   >
-                    {columns.map((column) => (
-                      <td
-                        key={column.key}
-                        className="px-6 py-4 text-sm text-gray-900"
-                      >
-                        {/* added custom truncate functionality */}
-                        <div
-                          title={String(row[column.key] || "")} // tooltip
-                          className="truncate max-w-37.5 md:max-w-50 lg:max-w-75"
+                    {columns.map((column) => {
+                      // ✅ FIX: compute once
+                      const value = getNestedValue(row, column.key);
+
+                      return (
+                        <td
+                          key={column.key}
+                          className="px-6 py-4 text-sm text-gray-900"
                         >
-                          {column.customTruncate === true
-                            ? truncateText(
-                                String(row[column.key]),
-                                column.truncateLength ?? 15,
-                              )
-                            : column.render
-                              ? column.render(row[column.key], row)
-                              : row[column.key] || "-"}{" "}
-                        </div>
-                      </td>
-                    ))}
+                          <div
+                            title={String(value || "")}
+                            className="truncate max-w-37.5 md:max-w-50 lg:max-w-75"
+                          >
+                            {column.customTruncate === true
+                              ? truncateText(
+                                  String(value),
+                                  column.truncateLength ?? 15,
+                                )
+                              : column.render
+                                ? column.render(value, row)
+                                : (value ?? "-")}
+                          </div>
+                        </td>
+                      );
+                    })}
                   </tr>
                 ))
               )}
