@@ -72,6 +72,20 @@ export function AutoComplete({
     }
   }, [highlightedIndex]);
 
+  // -----------------------------
+  // Deduplicate by category
+  // -----------------------------
+  const uniqueCategoriesMap = new Map<string, Item>();
+  data.forEach((item) => {
+    if (item.category && !uniqueCategoriesMap.has(item.category)) {
+      uniqueCategoriesMap.set(item.category, item);
+    }
+  });
+  const uniqueData = Array.from(uniqueCategoriesMap.values());
+
+  // -----------------------------
+  // Keyboard navigation & Enter
+  // -----------------------------
   const handleKeyDown = (e: React.KeyboardEvent<HTMLInputElement>) => {
     if (!open) return;
 
@@ -91,29 +105,22 @@ export function AutoComplete({
       e.preventDefault();
 
       if (uniqueData[highlightedIndex]) {
-        onSelect(uniqueData[highlightedIndex]); // select highlighted
+        const selectedItem = uniqueData[highlightedIndex];
+
+        // 🔹 Fill input with category instead of product name
+        onChange(selectedItem.category || selectedItem.name);
+
+        // Keep old logic: still call onSelect with full item
+        onSelect(selectedItem);
       } else if (value.trim()) {
-        // trigger search from input itself
-        onSelect({
-          id: value,
-          name: value,
-        });
+        // User pressed Enter on raw input
+        onChange(value);
+        onSelect({ id: value, name: value });
       }
 
       setOpen(false);
     }
   };
-
-  // -----------------------------
-  // Deduplicate by category
-  // -----------------------------
-  const uniqueCategoriesMap = new Map<string, Item>();
-  data.forEach((item) => {
-    if (item.category && !uniqueCategoriesMap.has(item.category)) {
-      uniqueCategoriesMap.set(item.category, item);
-    }
-  });
-  const uniqueData = Array.from(uniqueCategoriesMap.values());
 
   return (
     <div className="relative w-full" ref={containerRef}>
@@ -146,6 +153,7 @@ export function AutoComplete({
                 //@ts-ignore
                 ref={(el) => (itemRefs.current[index] = el)}
                 onClick={() => {
+                  onChange(item.category || item.name); // Fill input with category
                   onSelect(item);
                   setOpen(false);
                 }}

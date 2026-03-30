@@ -228,8 +228,9 @@ export default function Search() {
                 setSearchInput(val); // only typing
               }}
               onSelect={(item) => {
-                setSearchInput(item.name);
-                triggerSearch(item.name);
+                const categoryValue = item.category || item.name;
+                setSearchInput(categoryValue);
+                triggerSearch(categoryValue);
               }}
               placeholder="Search products..."
               inputClassName="rounded-lg text-lg"
