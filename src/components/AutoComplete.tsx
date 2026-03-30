@@ -77,7 +77,9 @@ export function AutoComplete({
 
     if (e.key === "ArrowDown") {
       e.preventDefault();
-      setHighlightedIndex((prev) => (prev < data.length - 1 ? prev + 1 : prev));
+      setHighlightedIndex((prev) =>
+        prev < uniqueData.length - 1 ? prev + 1 : prev,
+      );
     }
 
     if (e.key === "ArrowUp") {
@@ -85,24 +87,13 @@ export function AutoComplete({
       setHighlightedIndex((prev) => (prev > 0 ? prev - 1 : 0));
     }
 
-    // if (e.key === "Enter") {
-    //   e.preventDefault();
-
-    //   if (data[highlightedIndex]) {
-    //     onSelect(data[highlightedIndex]);
-    //     setOpen(false);
-    //   } else if (value.trim()) {
-    //     console.log("Entered value:", value);
-    //     setOpen(false);
-    //   }
-    // }
     if (e.key === "Enter") {
       e.preventDefault();
 
-      if (data[highlightedIndex]) {
-        onSelect(data[highlightedIndex]); // existing behavior
+      if (uniqueData[highlightedIndex]) {
+        onSelect(uniqueData[highlightedIndex]); // select highlighted
       } else if (value.trim()) {
-        // 🔥 trigger search from input itself
+        // trigger search from input itself
         onSelect({
           id: value,
           name: value,
@@ -112,6 +103,17 @@ export function AutoComplete({
       setOpen(false);
     }
   };
+
+  // -----------------------------
+  // Deduplicate by category
+  // -----------------------------
+  const uniqueCategoriesMap = new Map<string, Item>();
+  data.forEach((item) => {
+    if (item.category && !uniqueCategoriesMap.has(item.category)) {
+      uniqueCategoriesMap.set(item.category, item);
+    }
+  });
+  const uniqueData = Array.from(uniqueCategoriesMap.values());
 
   return (
     <div className="relative w-full" ref={containerRef}>
@@ -135,10 +137,10 @@ export function AutoComplete({
         <div
           className={`absolute z-50 mt-1 w-full bg-white border rounded-md shadow-lg max-h-60 overflow-auto ${dropdownClassName}`}
         >
-          {data.length === 0 ? (
+          {uniqueData.length === 0 ? (
             <div className="p-2 text-sm text-gray-500">Search Products</div>
           ) : (
-            data.map((item, index) => (
+            uniqueData.map((item, index) => (
               <div
                 key={item.id}
                 //@ts-ignore
@@ -157,10 +159,8 @@ export function AutoComplete({
                   ${itemClassName}`}
               >
                 <div className="flex flex-col">
-                  <span className="font-medium">{item.name}</span>
-                  <span className="text-xs text-gray-500">
-                    {item.brand} • {item.category}
-                  </span>
+                  <span className="font-medium">{item.category}</span>
+                  <span className="text-xs text-gray-500">{item.brand}</span>
                 </div>
               </div>
             ))
