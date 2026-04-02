@@ -73,9 +73,15 @@ export const fetchProductDetail = async (id: number | string) => {
   return res.data;
 };
 
-export const fetchProductSearchKeyword = async (filters: { page?: number }) => {
+export const fetchProductSearchKeyword = async (filters: {
+  page?: number;
+  sort_by?: string;
+  order?: string;
+  search?: string;
+}) => {
   const res = await api.get("product/search/keywords/", {
     params: filters,
   });
+  console.log("response", res.data);
   return res.data;
 };

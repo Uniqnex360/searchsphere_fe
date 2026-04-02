@@ -1,7 +1,7 @@
 import { useState } from "react";
 import { useQuery } from "@tanstack/react-query";
 import { useSearchParams } from "react-router-dom";
-import { Eye } from "lucide-react";
+import { Eye, SearchIcon } from "lucide-react";
 
 import AppTable from "../../components/AppTable";
 import AppPagination from "../../components/AppPagination";
@@ -11,10 +11,13 @@ import { fetchProductSearchKeyword } from "../../api/product";
 const ProductSearchKeyword = () => {
   const [viewModal, setViewModal] = useState(false);
   const [selectedRow, setSelectedRow] = useState<any>(null);
+  const [sortKey, setSortKey] = useState<string>("");
+  const [sortDirection, setSortDirection] = useState<"asc" | "desc">("asc");
 
   const [searchParams, setSearchParams] = useSearchParams();
 
   const params = Object.fromEntries(searchParams.entries());
+  const searchQuery = params.search || "";
   const page = Number(params.page) || 1;
   const size = 50;
 
@@ -23,8 +26,14 @@ const ProductSearchKeyword = () => {
     isLoading,
     isError,
   } = useQuery({
-    queryKey: ["search-keywords", page],
-    queryFn: () => fetchProductSearchKeyword({ page }),
+    queryKey: ["search-keywords", page, sortKey, sortDirection, searchQuery],
+    queryFn: () =>
+      fetchProductSearchKeyword({
+        page,
+        sort_by: sortKey,
+        order: sortDirection,
+        search: searchQuery,
+      }),
   });
 
   const updateParams = (newParams: Record<string, string>) => {
@@ -49,11 +58,43 @@ const ProductSearchKeyword = () => {
     setSelectedRow(null);
   };
 
+  const handleSort = (key: string) => {
+    if (key === sortKey) {
+      // toggle direction
+      setSortDirection(sortDirection === "asc" ? "desc" : "asc");
+    } else {
+      setSortKey(key);
+      setSortDirection("asc");
+    }
+  };
+
   const columns = [
     {
-      key: "query.q",
-      label: "Search",
-      render: (_: any, row: any) => row?.query?.q || "--",
+      key: "q",
+      label: "Search Keywords",
+      sortable: true,
+      render: (_: any, row: any) => {
+        const value = row?.q;
+
+        if (!value) return "--";
+
+        // Remove surrounding quotes if present
+        const trimmed = value.trim();
+        const cleanValue =
+          trimmed.startsWith('"') && trimmed.endsWith('"')
+            ? trimmed.slice(1, -1)
+            : trimmed;
+
+        // Split by line breaks or just return wrapped div
+        return (
+          <div
+            className="whitespace-pre-wrap wrap-break-word text-sm text-gray-900"
+            title={cleanValue}
+          >
+            {cleanValue}
+          </div>
+        );
+      },
     },
     {
       key: "url",
@@ -74,7 +115,13 @@ const ProductSearchKeyword = () => {
       },
     },
     {
+      key: "search_count",
+      sortable: true,
+      label: "No of search",
+    },
+    {
       key: "total_result",
+      sortable: true,
       label: "No of Result",
       render: (_: any, row: any) => row?.total_result ?? "--",
     },
@@ -113,6 +160,34 @@ const ProductSearchKeyword = () => {
             Track user search queries and results
           </p>
         </div>
+        <div className="px-8 pt-6">
+          <div className="relative w-full">
+            <SearchIcon className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400 w-4 h-4" />
+
+            <input
+              type="text"
+              value={searchQuery} // controlled by URL param
+              onChange={(e) => {
+                updateParams({ search: e.target.value, page: "1" }); // reset page to 1 on new search
+              }}
+              placeholder="Search keywords"
+              className={`w-full rounded-md pl-10 pr-3 py-2 outline-none focus:ring-2 focus:ring-blue-500 bg-[#F1F5F9]`}
+            />
+          </div>
+        </div>
+        {(params.search || sortKey) && (
+          <div className="flex justify-end mr-4">
+            <button
+              className="ml-auto px-3 py-1 text-[12px] text-red-700 hover:text-red-900 rounded transition cursor-pointer"
+              onClick={() => {
+                setSearchParams({});
+                setSortKey("");
+              }}
+            >
+              Clear All
+            </button>
+          </div>
+        )}
 
         {/* Content */}
         <div className="p-8 space-y-4">
@@ -139,6 +214,9 @@ const ProductSearchKeyword = () => {
             columns={columns}
             data={Array.isArray(listData?.data) ? listData.data : []}
             isLoading={isLoading}
+            sortKey={sortKey}
+            sortDirection={sortDirection}
+            onSort={handleSort}
           />
 
           {/* Empty State */}
