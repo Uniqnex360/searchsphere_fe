@@ -201,6 +201,7 @@ export default function Search() {
       // truncateLength: 48,
     },
     { key: "brand", label: "Brand", width: "150px" },
+    { key: "product_type", label: "Product Type" },
     { key: "category", label: "Category" },
     {
       key: "actions",

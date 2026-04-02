@@ -140,7 +140,7 @@ export function AutoComplete({
       </div>
 
       {/* Dropdown */}
-      {open && (
+      {( open || value) && (
         <div
           className={`absolute z-50 mt-1 w-full bg-white border rounded-md shadow-lg max-h-60 overflow-auto ${dropdownClassName}`}
         >

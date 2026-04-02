@@ -103,14 +103,19 @@ const ProductSearchKeyword = () => {
         if (!row?.url) return "--";
 
         return (
-          <a
-            href={row.url}
-            target="_blank"
-            rel="noopener noreferrer"
-            className="text-blue-600 underline"
-          >
-            Open
-          </a>
+          <>
+            <a href={row.url} className="text-blue-600 underline">
+              Open
+            </a>
+          </>
+          // <a
+          //   href={row.url}
+          //   target="_blank"
+          //   rel="noopener noreferrer"
+          //   className="text-blue-600 underline"
+          // >
+          //   Open
+          // </a>
         );
       },
     },
@@ -162,8 +167,12 @@ const ProductSearchKeyword = () => {
             </p>
           </div>
           <div className="mt-auto">
-            <p className="text-sm text-gray-600">Total search count: {listData?.meta?.total}</p>
-            <p className="text-sm text-gray-600">Total unique count: {listData?.meta?.unique}</p>
+            <p className="text-sm text-gray-600">
+              Total search count: {listData?.meta?.total}
+            </p>
+            <p className="text-sm text-gray-600">
+              Total unique count: {listData?.meta?.unique}
+            </p>
           </div>
         </div>
         <div className="px-8 pt-6">
