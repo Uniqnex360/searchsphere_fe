@@ -21,6 +21,7 @@ export default function Search() {
   const filters = {
     q: params.q || "",
     brands: params.brands ? params.brands.split(",") : [],
+    product_type: params.product_type ? params.product_type.split(",") : [],
     category: params.category ? params.category.split(",") : [],
     price: params.price ? [params.price] : [],
     sortBy: params.sortBy || "",
@@ -82,7 +83,13 @@ export default function Search() {
   }, [searchInput]);
 
   const { data: suggestions } = useQuery({
-    queryKey: ["suggestions", debouncedInput, filters.brands, filters.category],
+    queryKey: [
+      "suggestions",
+      debouncedInput,
+      filters.brands,
+      filters.category,
+      filters.product_type,
+    ],
     enabled: true,
     // enabled: !!debouncedInput,
     queryFn: () =>
@@ -90,6 +97,7 @@ export default function Search() {
         q: debouncedInput,
         brands: filters.brands,
         category: filters.category,
+        product_type: filters.product_type,
         //@ts-ignore
         price: filters.price,
       }),
@@ -265,17 +273,24 @@ export default function Search() {
         </div>
 
         {/* FILTERS */}
-        <div className="flex items-center gap-4 px-5 pb-4">
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 px-5 pb-4">
           <MultiSelect
-            // options={brands}
             options={suggestions?.data?.facets?.brands || []}
             value={filters.brands}
             onChange={(v) => updateParams({ brands: v.join(","), page: "1" })}
-            placeholder="Filter by brands"
+            placeholder="Filter by Brands"
           />
 
           <MultiSelect
-            // options={category}
+            options={suggestions?.data?.facets?.product_type || []}
+            value={filters.product_type}
+            onChange={(v) =>
+              updateParams({ product_type: v.join(","), page: "1" })
+            }
+            placeholder="Filter by Product Type"
+          />
+
+          <MultiSelect
             options={suggestions?.data?.facets?.categories || []}
             value={filters.category}
             onChange={(v) => updateParams({ category: v.join(","), page: "1" })}
@@ -332,6 +347,7 @@ export default function Search() {
           filters.brands.length > 0 ||
           filters.category.length > 0 ||
           filters.price.length > 0 ||
+          filters.product_type.length > 0 ||
           filters.sortBy) && (
           <div className="flex justify-end mr-4">
             <button
@@ -367,7 +383,10 @@ export default function Search() {
                     className="h-48 w-full object-cover rounded"
                   />
                   <div className="mt-2 font-semibold">{p.name}</div>
-                  <div className="text-lg text-green-700"> $ {p.base_price || "--"}</div>
+                  <div className="text-lg text-green-700">
+                    {" "}
+                    $ {p.base_price || "--"}
+                  </div>
                   <div className="text-sm text-gray-500">{p.brand}</div>
                   <div className="text-sm text-gray-500">{p.category}</div>
                 </div>

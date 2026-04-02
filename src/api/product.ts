@@ -5,6 +5,7 @@ export const fetchProducts = async (filters: {
   q?: string;
   brands?: string[];
   category?: string[];
+  product_type?: string[];
   price?: string[]; // now accepts labels like "$50 - $12,837.5"
   sortBy?: string;
   page?: number;
@@ -14,6 +15,7 @@ export const fetchProducts = async (filters: {
   const params: any = {};
   if (filters.q) params.q = filters.q;
   if (filters.brands?.length) params.brand = filters.brands;
+  if (filters.product_type?.length) params.product_type = filters.product_type;
   if (filters.category?.length) params.category = filters.category;
   if (filters.page) params.page = filters.page;
 

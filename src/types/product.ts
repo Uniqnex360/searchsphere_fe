@@ -26,6 +26,11 @@ type Category = {
   name: string;
 };
 
+type Brand = {
+  id: number | string;
+  brand_name: string;
+}
+
 type ProductAttribute = {
   id: number | string;
   attribute_name: string;
@@ -35,7 +40,7 @@ type ProductAttribute = {
 export type ProductType = {
   id?: number | string;
   product_name: string;
-  brand: string | null;
+  brand: Brand;
   industry: Industry;
   category: Category;
   taxonomy: string;

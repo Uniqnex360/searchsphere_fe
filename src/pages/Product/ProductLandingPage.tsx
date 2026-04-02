@@ -48,7 +48,7 @@ const ProductLandingPage = () => {
             <div className="flex gap-2 py-4">
               {productData?.brand && (
                 <span className="px-3 py-1 bg-slate-100 text-slate-700 rounded-full text-sm font-medium cursor-pointer">
-                  {productData?.brand}
+                  {productData?.brand?.brand_name}
                 </span>
               )}
               {productData?.category?.name && (

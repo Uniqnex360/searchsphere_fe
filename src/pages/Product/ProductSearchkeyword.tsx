@@ -152,13 +152,19 @@ const ProductSearchKeyword = () => {
     <>
       <div className="w-full min-h-screen bg-gray-50">
         {/* Header */}
-        <div className="px-8 pt-6">
-          <h1 className="text-2xl font-semibold text-gray-800">
-            Product Search Keywords
-          </h1>
-          <p className="text-sm text-gray-500 mt-1">
-            Track user search queries and results
-          </p>
+        <div className="px-8 pt-6 flex justify-between">
+          <div>
+            <h1 className="text-2xl font-semibold text-gray-800">
+              Product Search Keywords
+            </h1>
+            <p className="text-sm text-gray-500 mt-1">
+              Track user search queries and results
+            </p>
+          </div>
+          <div className="mt-auto">
+            <p className="text-sm text-gray-600">Total search count: {listData?.meta?.total}</p>
+            <p className="text-sm text-gray-600">Total unique count: {listData?.meta?.unique}</p>
+          </div>
         </div>
         <div className="px-8 pt-6">
           <div className="relative w-full">
@@ -194,7 +200,7 @@ const ProductSearchKeyword = () => {
           {/* Pagination */}
           <div className="flex justify-end">
             <AppPagination
-              total={listData?.meta?.total || 0}
+              total={listData?.meta?.unique || 0}
               page={page}
               size={size}
               onPageChange={(p) => {
