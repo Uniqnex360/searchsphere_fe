@@ -76,7 +76,6 @@ export default function Search() {
   // ===============================
   // SUGGESTIONS (debounced input only)
   // ===============================
-  const [debouncedInput, setDebouncedInput] = useState(searchInput);
 
   useEffect(() => {
     if (!searchInput) return;
