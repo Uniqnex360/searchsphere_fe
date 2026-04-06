@@ -56,7 +56,7 @@ export const fetchProducts = async (filters: {
     params.sort_order = "desc";
   }
 
-  const res = await api.get("product/v4/auto-complete/", {
+  const res = await api.get("product/v6/list/", {
     params,
     headers: {
       "X-FE-URL": window.location.href,

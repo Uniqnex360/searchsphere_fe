@@ -300,14 +300,14 @@ export default function Search() {
         {/* FILTERS */}
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 px-5 pb-4">
           <MultiSelect
-            options={suggestions?.data?.facets?.brands || []}
+            options={productList?.data?.facets?.brands || []}
             value={filters.brands}
             onChange={(v) => updateParams({ brands: v.join(","), page: "1" })}
             placeholder="Filter by Brands"
           />
 
           <MultiSelect
-            options={suggestions?.data?.facets?.product_type || []}
+            options={productList?.data?.facets?.product_type || []}
             value={filters.product_type}
             onChange={(v) =>
               updateParams({ product_type: v.join(","), page: "1" })
@@ -316,7 +316,7 @@ export default function Search() {
           />
 
           <MultiSelect
-            options={suggestions?.data?.facets?.categories || []}
+            options={productList?.data?.facets?.categories || []}
             value={filters.category}
             onChange={(v) => updateParams({ category: v.join(","), page: "1" })}
             placeholder="Filter by category"
