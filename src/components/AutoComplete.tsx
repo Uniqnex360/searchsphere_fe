@@ -2,20 +2,15 @@ import { useState, useEffect, useRef } from "react";
 import { SearchIcon } from "lucide-react";
 
 type Item = {
-  id: string;
-  name: string;
-  brand?: string;
-  category?: string;
+  text: string; // API returns { text: "..." }
 };
 
 type AutoCompleteProps = {
   data: Item[];
   value: string;
   onChange: (value: string) => void;
-  onSelect: (item: Item) => void;
+  onSelect: (value: string) => void; // simplified: just return string
   placeholder?: string;
-
-  // 🎨 Custom styling
   inputClassName?: string;
   dropdownClassName?: string;
   itemClassName?: string;
@@ -32,92 +27,28 @@ export function AutoComplete({
   itemClassName = "",
 }: AutoCompleteProps) {
   const [open, setOpen] = useState(false);
-  const [highlightedIndex, setHighlightedIndex] = useState<number>(-1);
-
   const containerRef = useRef<HTMLDivElement>(null);
-  const itemRefs = useRef<(HTMLDivElement | null)[]>([]);
 
-  // Close dropdown when clicking outside
+  // Close dropdown on click outside
   useEffect(() => {
     const handleClickOutside = (e: MouseEvent) => {
-      if (!containerRef.current?.contains(e.target as Node)) {
-        setOpen(false);
-      }
+      if (!containerRef.current?.contains(e.target as Node)) setOpen(false);
     };
-
     document.addEventListener("mousedown", handleClickOutside);
     return () => document.removeEventListener("mousedown", handleClickOutside);
   }, []);
 
-  // Open dropdown when typing
+  // Open dropdown on typing
   useEffect(() => {
-    if (value) {
-      setOpen(true);
-      setHighlightedIndex(0);
-    }
+    if (value) setOpen(true);
   }, [value]);
 
-  // Reset highlight when closed
-  useEffect(() => {
-    if (!open) setHighlightedIndex(-1);
-  }, [open]);
-
-  // Auto-scroll to highlighted item
-  useEffect(() => {
-    if (highlightedIndex >= 0) {
-      itemRefs.current[highlightedIndex]?.scrollIntoView({
-        block: "nearest",
-        behavior: "smooth",
-      });
-    }
-  }, [highlightedIndex]);
-
-  // -----------------------------
-  // Deduplicate by category
-  // -----------------------------
-  const uniqueCategoriesMap = new Map<string, Item>();
-  data.forEach((item) => {
-    if (item.category && !uniqueCategoriesMap.has(item.category)) {
-      uniqueCategoriesMap.set(item.category, item);
-    }
-  });
-  const uniqueData = Array.from(uniqueCategoriesMap.values());
-
-  // -----------------------------
-  // Keyboard navigation & Enter
-  // -----------------------------
   const handleKeyDown = (e: React.KeyboardEvent<HTMLInputElement>) => {
-    if (!open) return;
-
-    if (e.key === "ArrowDown") {
-      e.preventDefault();
-      setHighlightedIndex((prev) =>
-        prev < uniqueData.length - 1 ? prev + 1 : prev,
-      );
-    }
-
-    if (e.key === "ArrowUp") {
-      e.preventDefault();
-      setHighlightedIndex((prev) => (prev > 0 ? prev - 1 : 0));
-    }
-
     if (e.key === "Enter") {
       e.preventDefault();
-
-      if (uniqueData[highlightedIndex]) {
-        const selectedItem = uniqueData[highlightedIndex];
-
-        // 🔹 Fill input with category instead of product name
-        onChange(selectedItem.category || selectedItem.name);
-
-        // Keep old logic: still call onSelect with full item
-        onSelect(selectedItem);
-      } else if (value.trim()) {
-        // User pressed Enter on raw input
-        onChange(value);
-        onSelect({ id: value, name: value });
+      if (value.trim()) {
+        onSelect(value); // 🔹 trigger product list API
       }
-
       setOpen(false);
     }
   };
@@ -127,7 +58,6 @@ export function AutoComplete({
       {/* Input */}
       <div className="relative w-full">
         <SearchIcon className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400 w-4 h-4" />
-
         <input
           type="text"
           value={value}
@@ -140,36 +70,24 @@ export function AutoComplete({
       </div>
 
       {/* Dropdown */}
-      {( open || value) && (
+      {open && value && (
         <div
           className={`absolute z-50 mt-1 w-full bg-white border rounded-md shadow-lg max-h-60 overflow-auto ${dropdownClassName}`}
         >
-          {uniqueData.length === 0 ? (
-            <div className="p-2 text-sm text-gray-500">Search Products</div>
+          {data.length === 0 ? (
+            <div className="p-2 text-sm text-gray-500">No results</div>
           ) : (
-            uniqueData.map((item, index) => (
+            data.map((item) => (
               <div
-                key={item.id}
-                //@ts-ignore
-                ref={(el) => (itemRefs.current[index] = el)}
+                key={item.text}
                 onClick={() => {
-                  onChange(item.category || item.name); // Fill input with category
-                  onSelect(item);
+                  onChange(item.text);
+                  onSelect(item.text); // trigger search
                   setOpen(false);
                 }}
-                className={`px-3 py-2 cursor-pointer transition-all duration-150
-                  ${
-                    index === highlightedIndex
-                      ? "bg-blue-100 text-blue-700"
-                      : "hover:bg-gray-100"
-                  }
-                  active:bg-blue-200
-                  ${itemClassName}`}
+                className={`px-3 py-2 cursor-pointer hover:bg-gray-100 ${itemClassName}`}
               >
-                <div className="flex flex-col">
-                  <span className="font-medium">{item.category}</span>
-                  <span className="text-xs text-gray-500">{item.brand}</span>
-                </div>
+                {item.text}
               </div>
             ))
           )}

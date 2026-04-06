@@ -4,7 +4,11 @@ import { useQuery } from "@tanstack/react-query";
 import { useNavigate, useSearchParams } from "react-router-dom";
 import { AutoComplete } from "../components/AutoComplete";
 import { MultiSelect } from "../components/MultiSelect";
-import { fetchProducts, fetchProductsFilterMeta } from "../api/product";
+import {
+  fetchProducts,
+  fetchProductsFilterMeta,
+  fetchAutosuggestV6,
+} from "../api/product";
 import AppPagination from "../components/AppPagination";
 import AppTable from "../components/AppTable";
 import type { ProductType } from "../types/product";
@@ -75,32 +79,46 @@ export default function Search() {
   const [debouncedInput, setDebouncedInput] = useState(searchInput);
 
   useEffect(() => {
+    if (!searchInput) return;
     const t = setTimeout(() => {
-      setDebouncedInput(searchInput);
+      fetchSuggestions(); // ✅ fetch when typing
     }, 200);
 
     return () => clearTimeout(t);
   }, [searchInput]);
 
-  const { data: suggestions } = useQuery({
-    queryKey: [
-      "suggestions",
-      debouncedInput,
-      filters.brands,
-      filters.category,
-      filters.product_type,
-    ],
-    enabled: true,
-    // enabled: !!debouncedInput,
+  // const { data: suggestions } = useQuery({
+  //   queryKey: [
+  //     "suggestions",
+  //     debouncedInput,
+  //     filters.brands,
+  //     filters.category,
+  //     filters.product_type,
+  //   ],
+  //   enabled: true,
+  //   // enabled: !!debouncedInput,
+  //   queryFn: () =>
+  //     fetchProducts({
+  //       q: debouncedInput,
+  //       brands: filters.brands,
+  //       category: filters.category,
+  //       product_type: filters.product_type,
+  //       //@ts-ignore
+  //       price: filters.price,
+  //     }),
+  // });
+
+  const { data: suggestions, refetch: fetchSuggestions } = useQuery({
+    queryKey: ["suggestions", searchInput],
     queryFn: () =>
-      fetchProducts({
-        q: debouncedInput,
-        brands: filters.brands,
-        category: filters.category,
-        product_type: filters.product_type,
-        //@ts-ignore
-        price: filters.price,
+      fetchAutosuggestV6({
+        q: searchInput,
+        // brands: filters.brands,
+        // category: filters.category,
+        // product_type: filters.product_type,
+        // price: filters.price,
       }),
+    enabled: false, // ❌ Don't fetch on mount
   });
   // ===============================
   // PRODUCT LIST (ONLY searchQuery triggers it)
@@ -230,7 +248,7 @@ export default function Search() {
       <div className="bg-white shadow-sm sticky top-0 z-50">
         <div className="h-[65px] flex items-center px-5">
           <div className="w-full md:w-3/4">
-            <AutoComplete
+            {/* <AutoComplete
               data={suggestions?.data?.results || []}
               value={searchInput}
               onChange={(val) => {
@@ -243,6 +261,13 @@ export default function Search() {
               }}
               placeholder="Search products..."
               inputClassName="rounded-lg text-lg"
+            /> */}
+            <AutoComplete
+              data={suggestions?.results || []}
+              value={searchInput}
+              onChange={setSearchInput} // typing
+              onSelect={triggerSearch} // Enter or click triggers product API
+              placeholder="Search products..."
             />
           </div>
           <div className="w-1/4 float-right">

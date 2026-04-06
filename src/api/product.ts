@@ -65,6 +65,18 @@ export const fetchProducts = async (filters: {
   return res.data;
 };
 
+export const fetchAutosuggestV6 = async (filters: { q?: string }) => {
+  const params: any = {};
+  if (filters.q) params.q = filters.q;
+  const res = await api.get("product/v6/auto-complete/", {
+    params,
+    headers: {
+      "X-FE-URL": window.location.href,
+    },
+  });
+  return res.data;
+};
+
 export const fetchProductsFilterMeta = async () => {
   const res = await api.get("/product/filter-meta/");
   return res.data;
