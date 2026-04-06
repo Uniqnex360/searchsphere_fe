@@ -107,7 +107,7 @@ export default function Search() {
   //     }),
   // });
 
-  const { data: suggestions, refetch: fetchSuggestions } = useQuery({
+  const { data: suggestions, refetch: fetchSuggestions, isLoading: suggestionLoading } = useQuery({
     queryKey: ["suggestions", searchInput],
     queryFn: () =>
       fetchAutosuggestV6({
@@ -267,6 +267,7 @@ export default function Search() {
               onChange={setSearchInput} // typing
               onSelect={triggerSearch} // Enter or click triggers product API
               placeholder="Search products..."
+              loading={suggestionLoading}
             />
           </div>
           <div className="w-1/4 float-right">

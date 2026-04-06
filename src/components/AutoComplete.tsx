@@ -14,6 +14,7 @@ type AutoCompleteProps = {
   inputClassName?: string;
   dropdownClassName?: string;
   itemClassName?: string;
+  loading?: boolean; // 🔹 new prop
 };
 
 export function AutoComplete({
@@ -25,6 +26,7 @@ export function AutoComplete({
   inputClassName = "",
   dropdownClassName = "",
   itemClassName = "",
+  loading = false, // default false
 }: AutoCompleteProps) {
   const [open, setOpen] = useState(false);
   const containerRef = useRef<HTMLDivElement>(null);
@@ -74,7 +76,9 @@ export function AutoComplete({
         <div
           className={`absolute z-50 mt-1 w-full bg-white border rounded-md shadow-lg max-h-60 overflow-auto ${dropdownClassName}`}
         >
-          {data.length === 0 ? (
+          {loading ? (
+            <div className="p-2 text-sm text-gray-500">Loading...</div> // 🔹 show loading
+          ) : data.length === 0 ? (
             <div className="p-2 text-sm text-gray-500">No results</div>
           ) : (
             data.map((item) => (
