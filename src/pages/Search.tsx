@@ -33,6 +33,7 @@ export default function Search() {
 
   const page = Number(params.page) || 1;
   const size = 50;
+  const isKeyword = searchParams.get("isKeyword") === "true";
 
   // ===============================
   // LOCAL INPUT STATE (for typing only)
@@ -107,7 +108,11 @@ export default function Search() {
   //     }),
   // });
 
-  const { data: suggestions, refetch: fetchSuggestions, isLoading: suggestionLoading } = useQuery({
+  const {
+    data: suggestions,
+    refetch: fetchSuggestions,
+    isLoading: suggestionLoading,
+  } = useQuery({
     queryKey: ["suggestions", searchInput],
     queryFn: () =>
       fetchAutosuggestV6({
@@ -270,7 +275,18 @@ export default function Search() {
               loading={suggestionLoading}
             />
           </div>
-          <div className="w-1/4 float-right">
+          <div className="w-1/4 float-right flex items-center justify-end">
+            {isKeyword && (
+              <>
+                <button
+                  onClick={() => navigate(-1)}
+                  className="px-4 py-2 bg-white border border-gray-300 hover:bg-gray-100 text-gray-700 rounded-lg shadow-sm transition"
+                >
+                  ← Back
+                </button>
+              </>
+            )}
+
             {/* list grid view toggle */}
             <div className="flex items-center justify-end mx-4 space-x-2">
               <button

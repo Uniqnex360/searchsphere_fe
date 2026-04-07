@@ -1,6 +1,7 @@
 import { useState } from "react";
 import { useQuery } from "@tanstack/react-query";
 import { useSearchParams } from "react-router-dom";
+import { useNavigate } from "react-router-dom";
 import { Eye, SearchIcon } from "lucide-react";
 
 import AppTable from "../../components/AppTable";
@@ -9,6 +10,7 @@ import AppModal from "../../components/AppModal";
 import { fetchProductSearchKeyword } from "../../api/product";
 
 const ProductSearchKeyword = () => {
+  const navigate = useNavigate();
   const [viewModal, setViewModal] = useState(false);
   const [selectedRow, setSelectedRow] = useState<any>(null);
   const [sortKey, setSortKey] = useState<string>("");
@@ -104,9 +106,24 @@ const ProductSearchKeyword = () => {
 
         return (
           <>
-            <a href={row.url} className="text-blue-600 underline">
+            {/* <a href={row.url} className="text-blue-600 underline">
               Open
-            </a>
+            </a> */}
+            <button
+              onClick={() => {
+                try {
+                  const urlObj = new URL(row.url);
+                  const params = new URLSearchParams(urlObj.search);
+                  params.delete("isKeyword");
+                  navigate(`/product?${params.toString()}&isKeyword=true`);
+                } catch (e) {
+                  console.error("Invalid URL:", row.url);
+                }
+              }}
+              className="text-blue-600 underline cursor-pointer"
+            >
+              Open
+            </button>
           </>
           // <a
           //   href={row.url}
