@@ -112,6 +112,6 @@ export const productImport = async (file: File) => {
 };
 
 export const fetchImportList = async () => {
-  const res = await api.get("import/list");
+  const res = await api.get("import/list/");
   return res.data;
 };
