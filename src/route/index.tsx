@@ -4,6 +4,7 @@ import Dashboard from "../pages/Dashboard";
 import Products from "../pages/Products";
 import Settings from "../pages/Settings";
 import Search from "../pages/Search";
+import BulkUpload from "../pages/BulkUpload";
 import NotFound from "../pages/Error/NotFound";
 import ErrorPage from "../pages/Error/Error";
 import { productRoutes } from "./product";
@@ -12,12 +13,13 @@ export const router = createBrowserRouter([
   {
     path: "/",
     element: <Layout />,
-    errorElement: <ErrorPage />, 
+    errorElement: <ErrorPage />,
     children: [
       { index: true, element: <Dashboard /> },
       { path: "products", element: <Products /> },
       { path: "settings", element: <Settings /> },
       { path: "product", element: <Search /> },
+      { path: "import", element: <BulkUpload /> },
       ...productRoutes,
     ],
   },

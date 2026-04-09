@@ -99,3 +99,19 @@ export const fetchProductSearchKeyword = async (filters: {
   console.log("response", res.data);
   return res.data;
 };
+
+export const productImport = async (file: File) => {
+  const formData = new FormData();
+  formData.append("file", file);
+
+  const response = await api.post("/import/product/", formData, {
+    headers: { "Content-Type": "multipart/form-data" },
+  });
+
+  return response.data;
+};
+
+export const fetchImportList = async () => {
+  const res = await api.get("import/list");
+  return res.data;
+};
