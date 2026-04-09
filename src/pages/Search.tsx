@@ -80,7 +80,9 @@ export default function Search() {
   // ===============================
 
   useEffect(() => {
-    if (!searchInput) return;
+    if (!searchInput) {
+      setSearchParams({})
+    };
     const t = setTimeout(() => {
       fetchSuggestions(); // ✅ fetch when typing
     }, 200);
@@ -251,69 +253,56 @@ export default function Search() {
     <div className="flex flex-col h-screen w-full bg-gray-50">
       {/* HEADER */}
       <div className="bg-white shadow-sm sticky top-0 z-50">
-        <div className="h-[65px] flex items-center px-5">
-          <div className="w-full md:w-3/4">
-            {/* <AutoComplete
-              data={suggestions?.data?.results || []}
-              value={searchInput}
-              onChange={(val) => {
-                setSearchInput(val); // only typing
-              }}
-              onSelect={(item) => {
-                const categoryValue = item.category || item.name;
-                setSearchInput(categoryValue);
-                triggerSearch(categoryValue);
-              }}
-              placeholder="Search products..."
-              inputClassName="rounded-lg text-lg"
-            /> */}
-            <AutoComplete
-              data={suggestions?.results || []}
-              value={searchInput}
-              onChange={setSearchInput} // typing
-              onSelect={triggerSearch} // Enter or click triggers product API
-              placeholder="Search products..."
-              loading={suggestionLoading}
-            />
-          </div>
-          <div className="w-1/4 float-right flex items-center justify-end">
+        <div className="h-[65px] flex items-center justify-between px-5 gap-4">
+          {/* LEFT SECTION (Back + Search) */}
+          <div className="flex items-center gap-3 flex-1 min-w-0">
             {isKeyword && (
-              <>
-                <button
-                  onClick={() => navigate(-1)}
-                  className="px-4 py-2 bg-white border border-gray-300 hover:bg-gray-100 text-gray-700 rounded-lg shadow-sm transition"
-                >
-                  ← Back
-                </button>
-              </>
+              <button
+                onClick={() => navigate(-1)}
+                className="px-3 py-2 bg-white border border-gray-300 hover:bg-gray-100 text-gray-700 rounded-lg shadow-sm transition whitespace-nowrap"
+              >
+                ← Back
+              </button>
             )}
 
-            {/* list grid view toggle */}
-            <div className="flex items-center justify-end mx-4 space-x-2">
-              <button
-                onClick={() => setGridView(!gridView)}
-                className={`p-2 rounded flex items-center justify-center transition-colors ${
-                  !gridView
-                    ? "bg-blue-500 text-white"
-                    : "bg-gray-100 hover:bg-gray-200"
-                }`}
-              >
-                <List size={20} />
-              </button>
-
-              <button
-                onClick={() => setGridView(!gridView)}
-                className={`p-2 rounded flex items-center justify-center transition-colors ${
-                  gridView
-                    ? "bg-blue-500 text-white"
-                    : "bg-gray-100 hover:bg-gray-200"
-                }`}
-              >
-                <LayoutGrid size={20} />
-              </button>
+            <div className="flex-1 min-w-0">
+              <AutoComplete
+                data={suggestions?.results || []}
+                value={searchInput}
+                onChange={setSearchInput}
+                onSelect={triggerSearch}
+                placeholder="Search products..."
+                loading={suggestionLoading}
+              />
             </div>
           </div>
+
+          {/* RIGHT SECTION (View Toggle) */}
+          <div className="flex items-center gap-2">
+            <button
+              onClick={() => setGridView(false)}
+              className={`p-2 rounded flex items-center justify-center transition-colors ${
+                !gridView
+                  ? "bg-blue-500 text-white"
+                  : "bg-gray-100 hover:bg-gray-200"
+              }`}
+            >
+              <List size={20} />
+            </button>
+
+            <button
+              onClick={() => setGridView(true)}
+              className={`p-2 rounded flex items-center justify-center transition-colors ${
+                gridView
+                  ? "bg-blue-500 text-white"
+                  : "bg-gray-100 hover:bg-gray-200"
+              }`}
+            >
+              <LayoutGrid size={20} />
+            </button>
+          </div>
         </div>
+
         {/* FILTERS */}
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-4 px-5 pb-4 items-center">
           {/* Normal Filters */}
