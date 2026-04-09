@@ -1,5 +1,5 @@
 import { ChevronDown, X } from "lucide-react";
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useRef, useState, ReactNode } from "react";
 
 interface Props {
   options: string[];
@@ -8,7 +8,11 @@ interface Props {
   placeholder?: string;
   searchable?: boolean;
   selectAllLabel?: string;
-  singleSelect?: boolean; // new prop to switch modes
+  singleSelect?: boolean;
+
+  // NEW
+  triggerType?: "box" | "icon";
+  icon?: ReactNode;
 }
 
 export function MultiSelect({
@@ -19,23 +23,23 @@ export function MultiSelect({
   searchable = true,
   selectAllLabel = "Select All",
   singleSelect = false,
+  triggerType = "box",
+  icon,
 }: Props) {
   const [isOpen, setIsOpen] = useState(false);
   const [search, setSearch] = useState("");
   const wrapperRef = useRef<HTMLDivElement>(null);
 
-  // Filter options based on search
   const filteredOptions = searchable
     ? options.filter((opt) => opt.toLowerCase().includes(search.toLowerCase()))
     : options;
 
   const allSelected = value.length === options.length;
 
-  // Toggle selection for an option
   const toggleOption = (option: string) => {
     if (singleSelect) {
-      onChange([option]); // only allow one selection
-      setIsOpen(false); // close dropdown
+      onChange([option]);
+      setIsOpen(false);
     } else {
       if (value.includes(option)) {
         onChange(value.filter((v) => v !== option));
@@ -45,7 +49,6 @@ export function MultiSelect({
     }
   };
 
-  // Toggle select all (only in multi-select mode)
   const toggleSelectAll = () => {
     if (allSelected) {
       onChange([]);
@@ -54,7 +57,6 @@ export function MultiSelect({
     }
   };
 
-  // Close dropdown on outside click
   useEffect(() => {
     function handleClickOutside(event: MouseEvent) {
       if (
@@ -72,52 +74,63 @@ export function MultiSelect({
   const remainingCount = value.length - 2;
 
   return (
-    <div className="relative min-w-[240px] w-full" ref={wrapperRef}>
-      {/* Input Box */}
-      <div
-        className="flex items-center gap-1 w-full px-3 py-2 border border-gray-300 rounded-lg cursor-pointer bg-white overflow-hidden"
-        onClick={() => setIsOpen((prev) => !prev)}
-      >
-        {value.length === 0 && (
-          <span className="text-sm text-gray-400 truncate">{placeholder}</span>
-        )}
-
-        <div className="flex items-center gap-1 flex-1 min-w-0 overflow-hidden">
-          {visibleValues.map((val) => (
-            <span
-              key={val}
-              title={val} // tooltip on hover
-              className="flex items-center gap-1 px-2 py-1 text-xs bg-blue-100 text-blue-700 rounded max-w-[120px] truncate"
-            >
-              <span className="truncate">{val}</span>
-              {!singleSelect && (
-                <X
-                  size={12}
-                  className="cursor-pointer flex-shrink-0"
-                  onClick={(e) => {
-                    e.stopPropagation();
-                    toggleOption(val);
-                  }}
-                />
-              )}
-            </span>
-          ))}
-
-          {remainingCount > 0 && !singleSelect && (
-            <span className="text-xs text-gray-500 flex-shrink-0 whitespace-nowrap">
-              +{remainingCount} more
+    <div className="relative inline-block" ref={wrapperRef}>
+      {/* ✅ Trigger */}
+      {triggerType === "icon" ? (
+        <div
+          className="cursor-pointer text-gray-600"
+          onClick={() => setIsOpen((prev) => !prev)}
+        >
+          {icon || <ChevronDown size={20} />}
+        </div>
+      ) : (
+        <div
+          className="flex items-center gap-1 min-w-[240px] w-full px-3 py-2 border border-gray-300 rounded-lg cursor-pointer bg-white overflow-hidden"
+          onClick={() => setIsOpen((prev) => !prev)}
+        >
+          {value.length === 0 && (
+            <span className="text-sm text-gray-400 truncate">
+              {placeholder}
             </span>
           )}
-        </div>
 
-        <div className="ml-2 text-gray-400 flex-shrink-0">
-          <ChevronDown size={18} />
-        </div>
-      </div>
+          <div className="flex items-center gap-1 flex-1 min-w-0 overflow-hidden">
+            {visibleValues.map((val) => (
+              <span
+                key={val}
+                title={val}
+                className="flex items-center gap-1 px-2 py-1 text-xs bg-blue-100 text-blue-700 rounded max-w-[120px] truncate"
+              >
+                <span className="truncate">{val}</span>
+                {!singleSelect && (
+                  <X
+                    size={12}
+                    className="cursor-pointer flex-shrink-0"
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      toggleOption(val);
+                    }}
+                  />
+                )}
+              </span>
+            ))}
 
-      {/* Dropdown */}
+            {remainingCount > 0 && !singleSelect && (
+              <span className="text-xs text-gray-500 flex-shrink-0 whitespace-nowrap">
+                +{remainingCount} more
+              </span>
+            )}
+          </div>
+
+          <div className="ml-2 text-gray-400 flex-shrink-0">
+            <ChevronDown size={18} />
+          </div>
+        </div>
+      )}
+
+      {/* ✅ Dropdown */}
       {isOpen && (
-        <div className="absolute z-[1000] mt-1 w-full min-w-[260px] bg-white border border-gray-200 rounded-lg shadow-lg max-h-[450px] overflow-y-auto">
+        <div className="absolute z-[1000] mt-1 w-[260px] bg-white border border-gray-200 rounded-lg shadow-lg max-h-[450px] overflow-y-auto">
           {searchable && (
             <div className="p-2 border-b">
               <input
@@ -130,7 +143,6 @@ export function MultiSelect({
             </div>
           )}
 
-          {/* Select All only in multi-select mode */}
           {!singleSelect && (
             <div
               className="px-3 py-2 text-sm cursor-pointer hover:bg-blue-50 flex items-center gap-2 border-b"
@@ -141,7 +153,6 @@ export function MultiSelect({
             </div>
           )}
 
-          {/* Options */}
           {filteredOptions.map((option) => (
             <div
               key={option}

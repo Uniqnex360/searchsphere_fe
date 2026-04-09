@@ -2,6 +2,7 @@ import { useState, useEffect } from "react";
 import { List, LayoutGrid, Eye } from "lucide-react";
 import { useQuery } from "@tanstack/react-query";
 import { useNavigate, useSearchParams } from "react-router-dom";
+import { DollarSign, ArrowDownUp } from "lucide-react";
 import { AutoComplete } from "../components/AutoComplete";
 import { MultiSelect } from "../components/MultiSelect";
 import {
@@ -313,9 +314,9 @@ export default function Search() {
             </div>
           </div>
         </div>
-
         {/* FILTERS */}
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 px-5 pb-4">
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-4 px-5 pb-4 items-center">
+          {/* Normal Filters */}
           <MultiSelect
             options={productList?.data?.facets?.brands || []}
             value={filters.brands}
@@ -339,33 +340,45 @@ export default function Search() {
             placeholder="Filter by category"
           />
 
-          <MultiSelect
-            options={priceRanges.map((r) => r.label)}
-            value={filters.price}
-            onChange={(v) => updateParams({ price: v.join(","), page: "1" })}
-            placeholder="Filter by price"
-            singleSelect
-          />
+          {/* ICON FILTER WRAPPER */}
+          <div className="flex items-center gap-1 w-fit justify-self-start">
+            {/* Price */}
+            <div className="flex items-center justify-center border border-gray-200 rounded-lg p-2 h-[42px] w-[42px]">
+              <MultiSelect
+                options={priceRanges.map((r) => r.label)}
+                value={filters.price}
+                onChange={(v) =>
+                  updateParams({ price: v.join(","), page: "1" })
+                }
+                singleSelect
+                triggerType="icon"
+                icon={<DollarSign size={18} />}
+              />
+            </div>
 
-          <MultiSelect
-            options={[
-              "Product Name (A → Z)",
-              "Product Name (Z → A)",
-              "Price (Low → High)",
-              "Price (High → Low)",
-            ]}
-            value={filters.sortBy ? [filters.sortBy] : []}
-            onChange={(v) =>
-              updateParams({
-                sortBy: v[0] || "",
-                page: "1",
-              })
-            }
-            placeholder="Sort by"
-            singleSelect
-          />
+            {/* Sort */}
+            <div className="flex items-center justify-center border border-gray-200 rounded-lg p-2 h-[42px] w-[42px]">
+              <MultiSelect
+                options={[
+                  "Product Name (A → Z)",
+                  "Product Name (Z → A)",
+                  "Price (Low → High)",
+                  "Price (High → Low)",
+                ]}
+                value={filters.sortBy ? [filters.sortBy] : []}
+                onChange={(v) =>
+                  updateParams({
+                    sortBy: v[0] || "",
+                    page: "1",
+                  })
+                }
+                singleSelect
+                triggerType="icon"
+                icon={<ArrowDownUp size={18} />}
+              />
+            </div>
+          </div>
         </div>
-
         {/* PAGINATION */}
         <div className="flex justify-end mr-4 p-2">
           <AppPagination
