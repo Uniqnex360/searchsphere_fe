@@ -40,12 +40,10 @@ export default function Search() {
   // LOCAL INPUT STATE (for typing only)
   // ===============================
   const [searchInput, setSearchInput] = useState(filters.q);
-  const [searchQuery, setSearchQuery] = useState(filters.q); // 🔥 triggers API
 
   // sync URL → input
   useEffect(() => {
     setSearchInput(filters.q);
-    setSearchQuery(filters.q);
   }, [filters.q]);
 
   // ===============================
@@ -81,8 +79,8 @@ export default function Search() {
 
   useEffect(() => {
     if (!searchInput) {
-      setSearchParams({})
-    };
+      setSearchParams({});
+    }
     const t = setTimeout(() => {
       fetchSuggestions(); // ✅ fetch when typing
     }, 200);
@@ -130,16 +128,40 @@ export default function Search() {
   // ===============================
   // PRODUCT LIST (ONLY searchQuery triggers it)
   // ===============================
+  // const {
+  //   data: productList,
+  //   isLoading,
+  //   isError,
+  // } = useQuery({
+  //   queryKey: ["products", searchQuery, filters, page],
+  //   queryFn: () =>
+  //     fetchProducts({
+  //       ...filters,
+  //       q: searchQuery,
+  //       //@ts-ignore
+  //       price: filters.price,
+  //       page,
+  //     }),
+  // });
   const {
     data: productList,
     isLoading,
     isError,
   } = useQuery({
-    queryKey: ["products", searchQuery, filters, page],
+    queryKey: [
+      "products",
+      filters.q,
+      filters.brands,
+      filters.product_type,
+      filters.category,
+      filters.price,
+      filters.sortBy,
+      page,
+    ],
     queryFn: () =>
       fetchProducts({
         ...filters,
-        q: searchQuery,
+        q: filters.q,
         //@ts-ignore
         price: filters.price,
         page,
@@ -161,7 +183,6 @@ export default function Search() {
   // ===============================
   const triggerSearch = (value: string) => {
     updateParams({ q: value, page: "1" });
-    setSearchQuery(value); // 🔥 THIS triggers product API
   };
 
   const columns = [

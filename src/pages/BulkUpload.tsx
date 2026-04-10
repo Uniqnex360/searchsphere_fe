@@ -8,8 +8,7 @@ import { productImport } from "../api/product";
 import AppTable from "../components/AppTable";
 
 const BulkUpload = () => {
-
-    //@ts-ignore
+  //@ts-ignore
   const [file, setFile] = useState<File | null>(null);
   const queryClient = useQueryClient();
 
@@ -22,8 +21,7 @@ const BulkUpload = () => {
       queryClient.invalidateQueries({ queryKey: ["import-list"] }); // refresh list
     },
     onError: (error: any) => {
-      toast.error("Upload failed!");
-      console.error(error);
+      toast.error(error?.response?.data?.detail || "Upload failed!");
     },
   });
 
