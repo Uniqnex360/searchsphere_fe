@@ -1,16 +1,16 @@
 import { useState } from "react";
 import { useQuery } from "@tanstack/react-query";
 
-import type { RangeType } from "../types/dashboard";
 import { dashboardProductSearchKey } from "../api/dashboard";
 
 export default function SearchDashboard() {
-  const [range, setRange] = useState<RangeType>("all");
+  const [startDate, setStartDate] = useState<string>("");
+  const [endDate, setEndDate] = useState<string>("");
 
   const { data, isLoading, isError, refetch, isFetching } = useQuery({
-    queryKey: ["search-dashboard", range],
-    queryFn: () => dashboardProductSearchKey(range),
-    staleTime: 30_000,
+    queryKey: ["search-dashboard", startDate, endDate],
+    queryFn: () =>
+      dashboardProductSearchKey(startDate || null, endDate || null),
   });
 
   const kpiCard = (
@@ -31,26 +31,42 @@ export default function SearchDashboard() {
   return (
     <div className="p-6 bg-gray-50 min-h-screen">
       {/* HEADER */}
-      <div className="flex items-center justify-between mb-6">
-        <h1 className="text-2xl font-bold text-gray-800">
-          Dashboard
-        </h1>
+      <div className="flex flex-col md:flex-row md:items-center justify-between mb-6 gap-4">
+        <h1 className="text-2xl font-bold text-gray-800">Search Dashboard</h1>
 
-        {/* RANGE FILTER */}
-        <div className="flex gap-2 bg-white p-1 rounded-lg shadow-sm border">
-          {(["all", "day", "week", "month"] as RangeType[]).map((r) => (
-            <button
-              key={r}
-              onClick={() => setRange(r)}
-              className={`px-3 py-1 text-sm rounded-md transition cursor-pointer ${
-                range === r
-                  ? "bg-gray-900 text-white"
-                  : "text-gray-600 hover:bg-gray-100"
-              }`}
-            >
-              {r.toUpperCase()}
-            </button>
-          ))}
+        {/* DATE FILTER */}
+        <div className="flex items-center gap-3 bg-white p-3 rounded-xl shadow-sm border border-gray-200">
+          <div className="flex flex-col">
+            <label className="text-xs text-gray-500">Start Date</label>
+            <input
+              type="date"
+              value={startDate}
+              max={new Date().toISOString().split("T")[0]} // 👈 disables future dates
+              onChange={(e) => setStartDate(e.target.value)}
+              className="border rounded-lg px-3 py-1 text-sm focus:outline-none focus:ring-2 focus:ring-gray-300"
+            />
+          </div>
+
+          <div className="flex flex-col">
+            <label className="text-xs text-gray-500">End Date</label>
+            <input
+              type="date"
+              value={endDate}
+              max={new Date().toISOString().split("T")[0]} // 👈 disables future dates
+              onChange={(e) => setEndDate(e.target.value)}
+              className="border rounded-lg px-3 py-1 text-sm focus:outline-none focus:ring-2 focus:ring-gray-300"
+            />
+          </div>
+
+          <button
+            onClick={() => {
+              setStartDate("");
+              setEndDate("");
+            }}
+            className="text-sm px-3 py-2 bg-gray-100 hover:bg-gray-200 rounded-lg"
+          >
+            Reset
+          </button>
         </div>
       </div>
 
@@ -82,7 +98,6 @@ export default function SearchDashboard() {
       {/* CONTENT */}
       {data && (
         <>
-          {/* KPI GRID */}
           <div className="grid grid-cols-1 md:grid-cols-3 lg:grid-cols-4 gap-4">
             {kpiCard("Total Searches", data.total_searches)}
             {kpiCard("Unique Searches", data.unique_searches)}
@@ -111,46 +126,7 @@ export default function SearchDashboard() {
             {kpiCard("Unique Failed Keywords", data.unique_failed_keywords)}
           </div>
 
-          {/* TOP KEYWORD CARD */}
-          {/* <div className="mt-6 bg-gradient-to-r from-blue-600 to-indigo-600 text-white p-6 rounded-xl shadow-md">
-            <p className="text-sm opacity-80">Top Keyword</p>
-            <p className="text-2xl font-bold mt-1">
-              {data.top_keyword?.q || "N/A"}
-            </p>
-            <p className="text-sm mt-1 opacity-90">
-              Searches: {data.top_keyword?.count || 0}
-            </p>
-          </div> */}
-
-          {/* SUMMARY SECTION */}
-          {/* <div className="mt-6 grid grid-cols-1 md:grid-cols-2 gap-4">
-            <div className="bg-white p-4 rounded-xl border">
-              <h3 className="font-semibold mb-2">Performance</h3>
-              <p className="text-sm text-gray-600">
-                Failure Rate:{" "}
-                <span className="font-bold text-red-500">
-                  {data.failure_rate_percent}%
-                </span>
-              </p>
-              <p className="text-sm text-gray-600">
-                Success Rate:{" "}
-                <span className="font-bold text-green-600">
-                  {(100 - data.failure_rate_percent).toFixed(1)}%
-                </span>
-              </p>
-            </div>
-
-            <div className="bg-white p-4 rounded-xl border">
-              <h3 className="font-semibold mb-2">Insight</h3>
-              <p className="text-sm text-gray-600">
-                {data.zero_result_searches > data.unique_failed_keywords
-                  ? "Multiple repeated zero-result queries detected. Consider improving search indexing."
-                  : "Search quality is stable."}
-              </p>
-            </div>
-          </div> */}
-
-          {/* REFRESH INDICATOR */}
+          {/* REFRESH */}
           {isFetching && (
             <p className="text-xs text-gray-400 mt-4">Updating...</p>
           )}

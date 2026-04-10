@@ -40,13 +40,15 @@ export function MultiSelect({
   const toggleOption = (option: string) => {
     if (singleSelect) {
       onChange([option]);
-      setIsOpen(false);
+      setIsOpen(false); // ✅ CLOSE DROPDOWN (single select)
     } else {
       if (value.includes(option)) {
         onChange(value.filter((v) => v !== option));
       } else {
         onChange([...value, option]);
       }
+
+      setIsOpen(false); // ✅ CLOSE DROPDOWN (multi select fix)
     }
   };
 

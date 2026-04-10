@@ -60,6 +60,24 @@ const BulkUpload = () => {
       key: "error",
       label: "Error",
     },
+    {
+      key: "created_at",
+      label: "Created At",
+      width: "180px",
+      render: (_: any, row: any) => {
+        if (!row?.created_at) return "--";
+
+        const date = new Date(row.created_at);
+
+        const formatted = date.toLocaleString("en-IN", {
+          day: "2-digit",
+          month: "short",
+          year: "numeric",
+        });
+
+        return <span className="text-sm text-gray-700">{formatted}</span>;
+      },
+    },
   ];
 
   return (
