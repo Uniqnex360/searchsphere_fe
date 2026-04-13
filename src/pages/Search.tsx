@@ -30,6 +30,7 @@ export default function Search() {
     category: params.category ? params.category.split(",") : [],
     price: params.price ? [params.price] : [],
     sortBy: params.sortBy || "",
+    sortDirection: params.sortDirection || "",
   };
 
   const page = Number(params.page) || 1;
@@ -88,27 +89,6 @@ export default function Search() {
     return () => clearTimeout(t);
   }, [searchInput]);
 
-  // const { data: suggestions } = useQuery({
-  //   queryKey: [
-  //     "suggestions",
-  //     debouncedInput,
-  //     filters.brands,
-  //     filters.category,
-  //     filters.product_type,
-  //   ],
-  //   enabled: true,
-  //   // enabled: !!debouncedInput,
-  //   queryFn: () =>
-  //     fetchProducts({
-  //       q: debouncedInput,
-  //       brands: filters.brands,
-  //       category: filters.category,
-  //       product_type: filters.product_type,
-  //       //@ts-ignore
-  //       price: filters.price,
-  //     }),
-  // });
-
   const {
     data: suggestions,
     refetch: fetchSuggestions,
@@ -118,31 +98,10 @@ export default function Search() {
     queryFn: () =>
       fetchAutosuggestV6({
         q: searchInput,
-        // brands: filters.brands,
-        // category: filters.category,
-        // product_type: filters.product_type,
-        // price: filters.price,
       }),
     enabled: false, // ❌ Don't fetch on mount
   });
-  // ===============================
-  // PRODUCT LIST (ONLY searchQuery triggers it)
-  // ===============================
-  // const {
-  //   data: productList,
-  //   isLoading,
-  //   isError,
-  // } = useQuery({
-  //   queryKey: ["products", searchQuery, filters, page],
-  //   queryFn: () =>
-  //     fetchProducts({
-  //       ...filters,
-  //       q: searchQuery,
-  //       //@ts-ignore
-  //       price: filters.price,
-  //       page,
-  //     }),
-  // });
+
   const {
     data: productList,
     isLoading,
@@ -156,6 +115,7 @@ export default function Search() {
       filters.category,
       filters.price,
       filters.sortBy,
+      filters.sortDirection,
       page,
     ],
     queryFn: () =>
@@ -178,6 +138,23 @@ export default function Search() {
     });
   };
 
+  const handleSort = (key: string) => {
+    const currentSortBy = filters.sortBy;
+    const currentSortDir = filters.sortDirection || "asc";
+
+    let newSortDir: "asc" | "desc" = "asc";
+
+    if (currentSortBy === key) {
+      newSortDir = currentSortDir === "asc" ? "desc" : "asc";
+    }
+
+    updateParams({
+      sortBy: key,
+      sortDirection: newSortDir,
+      page: "1",
+    });
+  };
+
   // ===============================
   // SEARCH TRIGGER (ENTER / SELECT)
   // ===============================
@@ -186,31 +163,6 @@ export default function Search() {
   };
 
   const columns = [
-    // {
-    //   key: "selection",
-    //   label: (
-    //     <input
-    //       type="checkbox"
-    //       checked={
-    //         selectedAssets.size === filteredAssets.length &&
-    //         filteredAssets.length > 0
-    //       }
-    //       onChange={toggleSelectAll}
-    //       className="w-4 h-4 rounded border-gray-300 text-blue-600 focus:ring-blue-500"
-    //     />
-    //   ) as any,
-    //   render: (_: any, row: DigitalAsset) => (
-    //     <div onClick={(e) => e.stopPropagation()}>
-    //       <input
-    //         type="checkbox"
-    //         checked={selectedAssets.has(row)}
-    //         onChange={() => toggleSelect(row)}
-    //         className="w-4 h-4 rounded cursor-pointer border-gray-300 text-blue-600 focus:ring-blue-500"
-    //       />
-    //     </div>
-    //   ),
-    //   width: "80px",
-    // },
     {
       key: "image",
       label: "Image",
@@ -243,12 +195,27 @@ export default function Search() {
     {
       key: "name",
       label: "Name",
-      // customTruncate: true,
-      // truncateLength: 48,
+      render: (_: any, row: ProductType) => {
+        //@ts-ignore
+        const name = row?.name || "--";
+
+        return (
+          <div
+            className="whitespace-normal break-words text-sm text-gray-900"
+            style={{
+              maxWidth: 300, // controls wrapping width
+              lineHeight: "1.4",
+            }}
+            title={name}
+          >
+            {name}
+          </div>
+        );
+      },
     },
-    { key: "brand", label: "Brand", width: "150px" },
-    { key: "product_type", label: "Product Type" },
-    { key: "category", label: "Category" },
+    { key: "brand", label: "Brand", width: "200px", sortable: true },
+    { key: "product_type", label: "Product Type", width: "200px", sortable: true },
+    { key: "category", label: "Category", width: "200px", sortable: true },
     {
       key: "actions",
       label: "Actions",
@@ -466,6 +433,10 @@ export default function Search() {
               columns={columns}
               data={productList?.data?.results}
               isLoading={isLoading}
+              sortKey={filters.sortBy}
+              //@ts-ignore
+              sortDirection={filters.sortDirection}
+              onSort={handleSort}
             />
           </div>
         </>

@@ -1,8 +1,8 @@
 import { useState, useEffect, useRef } from "react";
-import { SearchIcon } from "lucide-react";
+import { SearchIcon, X } from "lucide-react"; // 🔥 added X
 
 type Item = {
-  text: string; // API returns { text: "..." }
+  text: string;
 };
 
 type AutoCompleteProps = {
@@ -29,10 +29,9 @@ export function AutoComplete({
   loading = false,
 }: AutoCompleteProps) {
   const [open, setOpen] = useState(false);
-  const [isUserTyping, setIsUserTyping] = useState(false); // 🔥 new
+  const [isUserTyping, setIsUserTyping] = useState(false);
   const containerRef = useRef<HTMLDivElement>(null);
 
-  // Close dropdown on click outside
   useEffect(() => {
     const handleClickOutside = (e: MouseEvent) => {
       if (!containerRef.current?.contains(e.target as Node)) setOpen(false);
@@ -41,20 +40,18 @@ export function AutoComplete({
     return () => document.removeEventListener("mousedown", handleClickOutside);
   }, []);
 
-  // 🔥 Open dropdown ONLY when user types (not on initial load)
   useEffect(() => {
     if (value && isUserTyping) {
       setOpen(true);
     }
   }, [value, isUserTyping]);
 
-  // 🔥 shared handler
   const triggerSearch = (val: string) => {
     if (val.trim()) {
       onSelect(val);
     }
     setOpen(false);
-    setIsUserTyping(false); // reset
+    setIsUserTyping(false);
   };
 
   const handleKeyDown = (e: React.KeyboardEvent<HTMLInputElement>) => {
@@ -69,20 +66,33 @@ export function AutoComplete({
       {/* Input */}
       <div className="relative w-full">
         <SearchIcon className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400 w-4 h-4" />
+
         <input
           type="text"
           value={value}
           onChange={(e) => {
-            setIsUserTyping(true); // 🔥 detect typing
+            setIsUserTyping(true);
             onChange(e.target.value);
           }}
           onFocus={() => {
-            if (isUserTyping && value) setOpen(true); // 🔥 prevent auto-open on navigation
+            if (isUserTyping && value) setOpen(true);
           }}
           onKeyDown={handleKeyDown}
           placeholder={placeholder}
-          className={`w-full rounded-md pl-10 pr-3 py-2 outline-none focus:ring-2 focus:ring-blue-500 bg-[#F1F5F9] ${inputClassName}`}
+          className={`w-full rounded-md pl-10 pr-10 py-2 outline-none focus:ring-2 focus:ring-blue-500 bg-[#F1F5F9] ${inputClassName}`} // 🔥 pr-10 updated
         />
+
+        {/* 🔥 CLEAR BUTTON (ADDED ONLY) */}
+        {value && (
+          <X
+            className="absolute right-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400 cursor-pointer hover:text-gray-600"
+            onClick={() => {
+              onChange("");
+              setOpen(false);
+              setIsUserTyping(false);
+            }}
+          />
+        )}
       </div>
 
       {/* Dropdown */}
@@ -98,17 +108,8 @@ export function AutoComplete({
             data.map((item) => (
               <div
                 key={item.text}
-                // OLD CODE (kept)
-                // onClick={() => {
-                //   onChange(item.text);
-                //   onSelect(item.text);
-                //   setOpen(false);
-                // }}
-
-                // 🔥 FIXED
                 onMouseDown={(e) => {
                   e.preventDefault();
-
                   const selectedValue = item.text;
                   onChange(selectedValue);
                   triggerSearch(selectedValue);

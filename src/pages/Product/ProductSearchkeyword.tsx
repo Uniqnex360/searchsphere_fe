@@ -2,7 +2,7 @@ import { useState } from "react";
 import { useQuery } from "@tanstack/react-query";
 import { useSearchParams } from "react-router-dom";
 import { useNavigate } from "react-router-dom";
-import { Eye, SearchIcon } from "lucide-react";
+import { Eye, SearchIcon, X } from "lucide-react";
 
 import AppTable from "../../components/AppTable";
 import AppPagination from "../../components/AppPagination";
@@ -196,15 +196,29 @@ const ProductSearchKeyword = () => {
           <div className="relative w-full">
             <SearchIcon className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400 w-4 h-4" />
 
-            <input
-              type="text"
-              value={searchQuery} // controlled by URL param
-              onChange={(e) => {
-                updateParams({ search: e.target.value, page: "1" }); // reset page to 1 on new search
-              }}
-              placeholder="Search keywords"
-              className={`w-full rounded-md pl-10 pr-3 py-2 outline-none focus:ring-2 focus:ring-blue-500 bg-[#F1F5F9]`}
-            />
+            <div className="relative w-full">
+              <SearchIcon className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400 w-4 h-4" />
+
+              <input
+                type="text"
+                value={searchQuery}
+                onChange={(e) => {
+                  updateParams({ search: e.target.value, page: "1" });
+                }}
+                placeholder="Search keywords"
+                className="w-full rounded-md pl-10 pr-10 py-2 outline-none focus:ring-2 focus:ring-blue-500 bg-[#F1F5F9]"
+              />
+
+              {/* 🔥 CLEAR BUTTON (ADDED ONLY) */}
+              {searchQuery && (
+                <X
+                  className="absolute right-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400 cursor-pointer hover:text-gray-600"
+                  onClick={() => {
+                    updateParams({ search: "", page: "1" });
+                  }}
+                />
+              )}
+            </div>
           </div>
         </div>
         {(params.search || sortKey) && (

@@ -8,6 +8,7 @@ export const fetchProducts = async (filters: {
   product_type?: string[];
   price?: string[]; // now accepts labels like "$50 - $12,837.5"
   sortBy?: string;
+  sortDirection?: string;
   page?: number;
 }) => {
   console.log("price", filters.price);
@@ -48,7 +49,14 @@ export const fetchProducts = async (filters: {
     "Price (High → Low)": { sort_by: "base_price", sort_order: "desc" },
   };
 
-  if (filters.sortBy && sortMap[filters.sortBy]) {
+  if (
+    filters.sortBy === "brand" ||
+    filters.sortBy === "category" ||
+    filters.sortBy === "product_type"
+  ) {
+    ((params.sort_by = filters.sortBy),
+      (params.sort_order = filters.sortDirection));
+  } else if (filters.sortBy && sortMap[filters.sortBy]) {
     params.sort_by = sortMap[filters.sortBy].sort_by;
     params.sort_order = sortMap[filters.sortBy].sort_order;
   } else {
