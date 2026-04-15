@@ -56,6 +56,9 @@ export const fetchProducts = async (filters: {
   ) {
     ((params.sort_by = filters.sortBy),
       (params.sort_order = filters.sortDirection));
+  } else if (filters.sortBy === "view_count") {
+    ((params.sort_by = "view_popularity"),
+      (params.sort_order = filters.sortDirection));
   } else if (filters.sortBy && sortMap[filters.sortBy]) {
     params.sort_by = sortMap[filters.sortBy].sort_by;
     params.sort_order = sortMap[filters.sortBy].sort_order;

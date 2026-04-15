@@ -216,6 +216,7 @@ export default function Search() {
     { key: "brand", label: "Brand", width: "200px", sortable: true },
     { key: "product_type", label: "Product Type", width: "200px", sortable: true },
     { key: "category", label: "Category", width: "200px", sortable: true },
+    {key: "view_count", label: "View Popularity", width: "200px", sortable: true},
     {
       key: "actions",
       label: "Actions",
