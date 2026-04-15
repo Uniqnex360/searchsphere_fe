@@ -52,7 +52,8 @@ export const fetchProducts = async (filters: {
   if (
     filters.sortBy === "brand" ||
     filters.sortBy === "category" ||
-    filters.sortBy === "product_type"
+    filters.sortBy === "product_type" ||
+    filters.sortBy === "search_popularity"
   ) {
     ((params.sort_by = filters.sortBy),
       (params.sort_order = filters.sortDirection));
