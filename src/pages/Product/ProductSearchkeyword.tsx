@@ -9,11 +9,9 @@ import AppPagination from "../../components/AppPagination";
 import AppModal from "../../components/AppModal";
 import { fetchProductSearchKeyword } from "../../api/product";
 
-type ProductSearchKeywordProps = {
-  nonZero: boolean | undefined;
-};
 
-const ProductSearchKeyword = ({ nonZero }: ProductSearchKeywordProps) => {
+
+const ProductSearchKeyword = () => {
   const navigate = useNavigate();
   const [viewModal, setViewModal] = useState(false);
   const [selectedRow, setSelectedRow] = useState<any>(null);
