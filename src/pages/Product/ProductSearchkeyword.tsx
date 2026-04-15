@@ -9,7 +9,11 @@ import AppPagination from "../../components/AppPagination";
 import AppModal from "../../components/AppModal";
 import { fetchProductSearchKeyword } from "../../api/product";
 
-const ProductSearchKeyword = () => {
+type ProductSearchKeywordProps = {
+  nonZero: boolean | undefined;
+};
+
+const ProductSearchKeyword = ({ nonZero }: ProductSearchKeywordProps) => {
   const navigate = useNavigate();
   const [viewModal, setViewModal] = useState(false);
   const [selectedRow, setSelectedRow] = useState<any>(null);
@@ -23,6 +27,8 @@ const ProductSearchKeyword = () => {
   const page = Number(params.page) || 1;
   const size = 50;
 
+  const type = params.type || "all";
+
   const {
     data: listData,
     isLoading,
@@ -35,6 +41,8 @@ const ProductSearchKeyword = () => {
         sort_by: sortKey,
         order: sortDirection,
         search: searchQuery,
+        nonZero:
+          type === "non_zero" ? true : type === "zero" ? false : undefined,
       }),
   });
 

@@ -1,9 +1,11 @@
 import { useState } from "react";
 import { useQuery } from "@tanstack/react-query";
+import { useNavigate } from "react-router-dom";
 
 import { dashboardProductSearchKey } from "../api/dashboard";
 
 export default function SearchDashboard() {
+  const navigate = useNavigate();
   const [startDate, setStartDate] = useState<string>("");
   const [endDate, setEndDate] = useState<string>("");
 
@@ -18,8 +20,14 @@ export default function SearchDashboard() {
     value: string | number,
     sub?: string,
     color?: string,
+    navigateStr?: string,
   ) => (
-    <div className="bg-white rounded-xl shadow-sm p-4 border border-gray-200 hover:shadow-md transition">
+    <div
+      className="bg-white cursor-pointer rounded-xl shadow-sm p-4 border border-gray-200 hover:shadow-md transition"
+      onClick={() => {
+        if (navigateStr) navigate(navigateStr);
+      }}
+    >
       <p className="text-sm text-gray-500">{title}</p>
       <p className={`text-2xl font-bold mt-1 ${color || "text-gray-900"}`}>
         {value ?? 0}
@@ -41,7 +49,7 @@ export default function SearchDashboard() {
             <input
               type="date"
               value={startDate}
-              max={new Date().toISOString().split("T")[0]} // 👈 disables future dates
+              max={new Date().toISOString().split("T")[0]}
               onChange={(e) => setStartDate(e.target.value)}
               className="border rounded-lg px-3 py-1 text-sm focus:outline-none focus:ring-2 focus:ring-gray-300"
             />
@@ -52,7 +60,7 @@ export default function SearchDashboard() {
             <input
               type="date"
               value={endDate}
-              max={new Date().toISOString().split("T")[0]} // 👈 disables future dates
+              max={new Date().toISOString().split("T")[0]}
               onChange={(e) => setEndDate(e.target.value)}
               className="border rounded-lg px-3 py-1 text-sm focus:outline-none focus:ring-2 focus:ring-gray-300"
             />
@@ -99,21 +107,40 @@ export default function SearchDashboard() {
       {data && (
         <>
           <div className="grid grid-cols-1 md:grid-cols-3 lg:grid-cols-4 gap-4">
-            {kpiCard("Total Searches", data.total_searches)}
-            {kpiCard("Unique Searches", data.unique_searches)}
+            {kpiCard(
+              "Total Searches",
+              data.total_searches,
+              undefined,
+              undefined,
+              "/product/search/keyword",
+            )}
+            {kpiCard(
+              "Unique Searches",
+              data.unique_searches,
+              undefined,
+              undefined,
+              "/product/search/keyword",
+            )}
             {kpiCard(
               "Successful Searches",
               data.successful_searches,
-              `${(
-                (data.successful_searches / data.total_searches) * 100 || 0
-              ).toFixed(1)}% success`,
+              `${
+                data.total_searches
+                  ? (
+                      (data.successful_searches / data.total_searches) *
+                      100
+                    ).toFixed(1)
+                  : "0.0"
+              }% success`,
               "text-green-600",
+              "/product/search/keyword?type=non_zero",
             )}
             {kpiCard(
               "Zero Result Searches",
               data.zero_result_searches,
               `${data.failure_rate_percent}% failure`,
               "text-red-500",
+              "/product/search/keyword?type=zero",
             )}
             {kpiCard(
               "Avg Results/Search",
@@ -122,8 +149,17 @@ export default function SearchDashboard() {
             {kpiCard(
               "Unique Success Keywords",
               data.unique_successful_keywords,
+              undefined,
+              undefined,
+              "/product/search/keyword?type=non_zero",
             )}
-            {kpiCard("Unique Failed Keywords", data.unique_failed_keywords)}
+            {kpiCard(
+              "Unique Failed Keywords",
+              data.unique_failed_keywords,
+              undefined,
+              undefined,
+              "/product/search/keyword?type=zero",
+            )}
           </div>
 
           {/* REFRESH */}

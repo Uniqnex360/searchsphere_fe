@@ -100,10 +100,22 @@ export const fetchProductSearchKeyword = async (filters: {
   sort_by?: string;
   order?: string;
   search?: string;
+  nonZero?: boolean;
 }) => {
+  const { nonZero, ...rest } = filters;
+
+  let result_type = "all";
+
+  if (nonZero === true) result_type = "non_zero";
+  else if (nonZero === false) result_type = "zero";
+
   const res = await api.get("product/search/keywords/", {
-    params: filters,
+    params: {
+      ...rest,
+      result_type,
+    },
   });
+
   console.log("response", res.data);
   return res.data;
 };
