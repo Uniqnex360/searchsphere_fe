@@ -31,6 +31,7 @@ const BulkUpload = () => {
   });
 
   const handleImport = (e: React.ChangeEvent<HTMLInputElement>) => {
+    if (mutation.isPending) return;
     const selectedFile = e.target.files?.[0] ?? null;
     if (!selectedFile) return;
     setFile(selectedFile);

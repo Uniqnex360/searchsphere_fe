@@ -114,6 +114,7 @@ export const productImport = async (file: File) => {
 
   const response = await api.post("/import/product/", formData, {
     headers: { "Content-Type": "multipart/form-data" },
+    timeout: 0,
   });
 
   return response.data;
