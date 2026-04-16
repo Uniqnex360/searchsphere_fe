@@ -110,6 +110,8 @@ export const fetchProductSearchKeyword = async (filters: {
   order?: string;
   search?: string;
   nonZero?: boolean;
+  start_date?: string;
+  end_date?: string;
 }) => {
   const { nonZero, ...rest } = filters;
 

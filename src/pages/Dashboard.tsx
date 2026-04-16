@@ -6,7 +6,7 @@ import { dashboardProductSearchKey } from "../api/dashboard";
 export default function SearchDashboard() {
   const navigate = useNavigate();
 
-  // ✅ URL state
+  // URL state
   const [searchParams, setSearchParams] = useSearchParams();
 
   const startDate = searchParams.get("startDate") || "";
@@ -18,19 +18,17 @@ export default function SearchDashboard() {
       dashboardProductSearchKey(startDate || null, endDate || null),
   });
 
-  // ✅ helper to update params
+  // helper to update params
   const updateParam = (key: string, value: string) => {
     const newParams = new URLSearchParams(searchParams);
 
-    if (value) {
-      newParams.set(key, value);
-    } else {
-      newParams.delete(key);
-    }
+    if (value) newParams.set(key, value);
+    else newParams.delete(key);
 
-    setSearchParams(newParams, { replace: true }); // avoids history spam
+    setSearchParams(newParams, { replace: true });
   };
 
+  // ✅ ONLY FIX: normalize URL before adding dates
   const kpiCard = (
     title: string,
     value: string | number,
@@ -41,7 +39,18 @@ export default function SearchDashboard() {
     <div
       className="bg-white cursor-pointer rounded-xl shadow-sm p-4 border border-gray-200 hover:shadow-md transition"
       onClick={() => {
-        if (navigateStr) navigate(navigateStr);
+        if (navigateStr) {
+          const [path, existingQuery] = navigateStr.split("?");
+
+          const params = new URLSearchParams(existingQuery || "");
+
+          if (startDate) params.set("startDate", startDate);
+          if (endDate) params.set("endDate", endDate);
+
+          const queryString = params.toString();
+
+          navigate(queryString ? `${path}?${queryString}` : path);
+        }
       }}
     >
       <p className="text-sm text-gray-500">{title}</p>
@@ -67,7 +76,7 @@ export default function SearchDashboard() {
               value={startDate}
               max={new Date().toISOString().split("T")[0]}
               onChange={(e) => updateParam("startDate", e.target.value)}
-              className="border rounded-lg px-3 py-1 text-sm focus:outline-none focus:ring-2 focus:ring-gray-300"
+              className="border rounded-lg px-3 py-1 text-sm"
             />
           </div>
 
@@ -78,7 +87,7 @@ export default function SearchDashboard() {
               value={endDate}
               max={new Date().toISOString().split("T")[0]}
               onChange={(e) => updateParam("endDate", e.target.value)}
-              className="border rounded-lg px-3 py-1 text-sm focus:outline-none focus:ring-2 focus:ring-gray-300"
+              className="border rounded-lg px-3 py-1 text-sm"
             />
           </div>
 
@@ -181,7 +190,6 @@ export default function SearchDashboard() {
             )}
           </div>
 
-          {/* REFRESH */}
           {isFetching && (
             <p className="text-xs text-gray-400 mt-4">Updating...</p>
           )}

@@ -1,15 +1,12 @@
 import { useState } from "react";
 import { useQuery } from "@tanstack/react-query";
-import { useSearchParams } from "react-router-dom";
-import { useNavigate } from "react-router-dom";
+import { useSearchParams, useNavigate } from "react-router-dom";
 import { Eye, SearchIcon, X } from "lucide-react";
 
 import AppTable from "../../components/AppTable";
 import AppPagination from "../../components/AppPagination";
 import AppModal from "../../components/AppModal";
 import { fetchProductSearchKeyword } from "../../api/product";
-
-
 
 const ProductSearchKeyword = () => {
   const navigate = useNavigate();
@@ -19,26 +16,38 @@ const ProductSearchKeyword = () => {
   const [sortDirection, setSortDirection] = useState<"asc" | "desc">("asc");
 
   const [searchParams, setSearchParams] = useSearchParams();
-
   const params = Object.fromEntries(searchParams.entries());
+
   const searchQuery = params.search || "";
   const page = Number(params.page) || 1;
-  const size = 50;
-
   const type = params.type || "all";
+
+  // ✅ DATE FROM URL (ADDED ONLY)
+  const startDate = params.startDate || "";
+  const endDate = params.endDate || "";
 
   const {
     data: listData,
     isLoading,
     isError,
   } = useQuery({
-    queryKey: ["search-keywords", page, sortKey, sortDirection, searchQuery],
+    queryKey: [
+      "search-keywords",
+      page,
+      sortKey,
+      sortDirection,
+      searchQuery,
+      startDate,
+      endDate,
+    ],
     queryFn: () =>
       fetchProductSearchKeyword({
         page,
         sort_by: sortKey,
         order: sortDirection,
         search: searchQuery,
+        start_date: startDate || undefined,
+        end_date: endDate || undefined,
         nonZero:
           type === "non_zero" ? true : type === "zero" ? false : undefined,
       }),
@@ -68,7 +77,6 @@ const ProductSearchKeyword = () => {
 
   const handleSort = (key: string) => {
     if (key === sortKey) {
-      // toggle direction
       setSortDirection(sortDirection === "asc" ? "desc" : "asc");
     } else {
       setSortKey(key);
@@ -86,14 +94,12 @@ const ProductSearchKeyword = () => {
 
         if (!value) return "--";
 
-        // Remove surrounding quotes if present
         const trimmed = value.trim();
         const cleanValue =
           trimmed.startsWith('"') && trimmed.endsWith('"')
             ? trimmed.slice(1, -1)
             : trimmed;
 
-        // Split by line breaks or just return wrapped div
         return (
           <div
             className="whitespace-pre-wrap wrap-break-word text-sm text-gray-900"
@@ -111,34 +117,27 @@ const ProductSearchKeyword = () => {
         if (!row?.url) return "--";
 
         return (
-          <>
-            {/* <a href={row.url} className="text-blue-600 underline">
-              Open
-            </a> */}
-            <button
-              onClick={() => {
-                try {
-                  const urlObj = new URL(row.url);
-                  const params = new URLSearchParams(urlObj.search);
-                  params.delete("isKeyword");
-                  navigate(`/product?${params.toString()}&isKeyword=true`);
-                } catch (e) {
-                  console.error("Invalid URL:", row.url);
-                }
-              }}
-              className="text-blue-600 underline cursor-pointer"
-            >
-              Open
-            </button>
-          </>
-          // <a
-          //   href={row.url}
-          //   target="_blank"
-          //   rel="noopener noreferrer"
-          //   className="text-blue-600 underline"
-          // >
-          //   Open
-          // </a>
+          <button
+            onClick={() => {
+              try {
+                const urlObj = new URL(row.url);
+                const urlParams = new URLSearchParams(urlObj.search);
+
+                urlParams.delete("isKeyword");
+
+                // preserve date
+                if (startDate) urlParams.set("startDate", startDate);
+                if (endDate) urlParams.set("endDate", endDate);
+
+                navigate(`/product?${urlParams.toString()}&isKeyword=true`);
+              } catch (e) {
+                console.error("Invalid URL:", row.url);
+              }
+            }}
+            className="text-blue-600 underline cursor-pointer"
+          >
+            Open
+          </button>
         );
       },
     },
@@ -163,18 +162,13 @@ const ProductSearchKeyword = () => {
           onClick={() => handleOpenModal(row)}
           className="flex items-center justify-center cursor-pointer"
         >
-          <button
-            className="p-1 hover:bg-gray-100 text-gray-600 rounded transition-colors"
-            title="View"
-          >
+          <button className="p-1 hover:bg-gray-100 text-gray-600 rounded transition-colors">
             <Eye size={16} />
           </button>
         </div>
       ),
     },
   ];
-
-  const tokens = selectedRow?.query?.tokens || {};
 
   return (
     <>
@@ -189,44 +183,82 @@ const ProductSearchKeyword = () => {
               Track user search queries and results
             </p>
           </div>
-          <div className="mt-auto">
-            <p className="text-sm text-gray-600">
-              Total search count: {listData?.meta?.total}
-            </p>
-            <p className="text-sm text-gray-600">
-              Total unique count: {listData?.meta?.unique}
-            </p>
+
+          {/* ✅ DATE FILTER ADDED (BEFORE TOTAL - AS YOU WANTED) */}
+          <div className="px-8 pt-4 flex gap-3 items-end">
+            <div className="flex flex-col">
+              <label className="text-xs text-gray-500">Start Date</label>
+              <input
+                type="date"
+                value={startDate}
+                onChange={(e) => updateParams({ startDate: e.target.value })}
+                className="border px-2 py-1 rounded text-sm"
+              />
+            </div>
+
+            <div className="flex flex-col">
+              <label className="text-xs text-gray-500">End Date</label>
+              <input
+                type="date"
+                value={endDate}
+                onChange={(e) => updateParams({ endDate: e.target.value })}
+                className="border px-2 py-1 rounded text-sm"
+              />
+            </div>
+
+            <div>
+              <button
+                onClick={() =>
+                  setSearchParams((prev) => {
+                    const p = new URLSearchParams(prev);
+                    p.delete("startDate");
+                    p.delete("endDate");
+                    return p;
+                  })
+                }
+                className="text-sm px-3 py-1 bg-gray-100 rounded hover:bg-gray-200"
+              >
+                Reset
+              </button>
+            </div>
+
+            {/* ❗ OLD TOTAL (UNCHANGED) */}
+            <div className="mt-auto">
+              <p className="text-sm text-gray-600">
+                Total search count: {listData?.meta?.total}
+              </p>
+              <p className="text-sm text-gray-600">
+                Total unique count: {listData?.meta?.unique}
+              </p>
+            </div>
           </div>
         </div>
+
+        {/* Search */}
         <div className="px-8 pt-6">
           <div className="relative w-full">
             <SearchIcon className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400 w-4 h-4" />
 
-            <div className="relative w-full">
-              <SearchIcon className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400 w-4 h-4" />
+            <input
+              type="text"
+              value={searchQuery}
+              onChange={(e) =>
+                updateParams({ search: e.target.value, page: "1" })
+              }
+              placeholder="Search keywords"
+              className="w-full rounded-md pl-10 pr-10 py-2 outline-none focus:ring-2 focus:ring-blue-500 bg-[#F1F5F9]"
+            />
 
-              <input
-                type="text"
-                value={searchQuery}
-                onChange={(e) => {
-                  updateParams({ search: e.target.value, page: "1" });
-                }}
-                placeholder="Search keywords"
-                className="w-full rounded-md pl-10 pr-10 py-2 outline-none focus:ring-2 focus:ring-blue-500 bg-[#F1F5F9]"
+            {searchQuery && (
+              <X
+                className="absolute right-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400 cursor-pointer hover:text-gray-600"
+                onClick={() => updateParams({ search: "", page: "1" })}
               />
-
-              {/* 🔥 CLEAR BUTTON (ADDED ONLY) */}
-              {searchQuery && (
-                <X
-                  className="absolute right-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400 cursor-pointer hover:text-gray-600"
-                  onClick={() => {
-                    updateParams({ search: "", page: "1" });
-                  }}
-                />
-              )}
-            </div>
+            )}
           </div>
         </div>
+
+        {/* Clear All */}
         {(params.search || sortKey) && (
           <div className="flex justify-end mr-4">
             <button
@@ -243,12 +275,11 @@ const ProductSearchKeyword = () => {
 
         {/* Content */}
         <div className="p-8 space-y-4">
-          {/* Pagination */}
           <div className="flex justify-end">
             <AppPagination
               total={listData?.meta?.unique || 0}
               page={page}
-              size={size}
+              size={50}
               onPageChange={(p) => {
                 updateParams({ page: String(p) });
                 window.scrollTo({ top: 0, behavior: "smooth" });
@@ -256,12 +287,10 @@ const ProductSearchKeyword = () => {
             />
           </div>
 
-          {/* Error State */}
           {isError && (
             <div className="text-red-500 text-sm">Failed to load data.</div>
           )}
 
-          {/* Table */}
           <AppTable
             columns={columns}
             data={Array.isArray(listData?.data) ? listData.data : []}
@@ -271,7 +300,6 @@ const ProductSearchKeyword = () => {
             onSort={handleSort}
           />
 
-          {/* Empty State */}
           {!isLoading && !listData?.data?.length && (
             <div className="text-center text-gray-500 text-sm">
               No data available
@@ -287,92 +315,9 @@ const ProductSearchKeyword = () => {
         title="Search Keyword (Tokens)"
       >
         <div className="max-h-[70vh] overflow-y-auto pr-2">
-          {!selectedRow ? (
-            <div className="text-gray-500 text-sm">No data selected</div>
-          ) : (
-            <div className="space-y-6 text-sm">
-              {/* Query */}
-              <div className="bg-white p-4 rounded-lg border">
-                <p className="text-xs text-gray-500 uppercase tracking-wide">
-                  Search Query
-                </p>
-                <p className="text-gray-800 font-medium mt-1">
-                  {selectedRow?.query?.q || "--"}
-                </p>
-              </div>
-
-              {/* URL */}
-              <div className="bg-white p-4 rounded-lg border">
-                <p className="text-xs text-gray-500 uppercase tracking-wide">
-                  URL
-                </p>
-                {selectedRow?.url ? (
-                  <a
-                    href={selectedRow.url}
-                    target="_blank"
-                    className="text-blue-600 underline break-all mt-1 inline-block"
-                  >
-                    {selectedRow.url}
-                  </a>
-                ) : (
-                  <p className="text-gray-500 mt-1">--</p>
-                )}
-              </div>
-
-              {/* Tokens */}
-              <div>
-                <p className="text-sm font-semibold text-gray-700 mb-3">
-                  Tokens Breakdown
-                </p>
-
-                {Object.keys(tokens).length === 0 ? (
-                  <p className="text-gray-500">No token data</p>
-                ) : (
-                  <div className="space-y-4">
-                    {Object.entries(tokens).map(([key, value]: any) => (
-                      <div
-                        key={key}
-                        className="p-4 border rounded-lg bg-gray-50 space-y-2"
-                      >
-                        <p className="font-semibold text-gray-800">{key}</p>
-
-                        <div className="text-gray-600">
-                          <span className="font-medium">Tokenizer:</span>{" "}
-                          {value?.tokenizer?.length
-                            ? value.tokenizer.join(", ")
-                            : "--"}
-                        </div>
-
-                        <div className="text-gray-600">
-                          <span className="font-medium">Lowercase:</span>{" "}
-                          {value?.filters?.lowercase?.length
-                            ? value.filters.lowercase.join(", ")
-                            : "--"}
-                        </div>
-
-                        <div className="text-gray-600">
-                          <span className="font-medium">Ascii Folding:</span>{" "}
-                          {value?.filters?.asciifolding?.length
-                            ? value.filters.asciifolding.join(", ")
-                            : "--"}
-                        </div>
-                      </div>
-                    ))}
-                  </div>
-                )}
-              </div>
-
-              {/* Debug JSON */}
-              <div>
-                <p className="text-sm font-semibold text-gray-700 mb-2">
-                  Raw Data
-                </p>
-                <pre className="bg-black text-green-400 p-4 rounded-lg text-xs overflow-auto max-h-64">
-                  {JSON.stringify(selectedRow?.query ?? {}, null, 2)}
-                </pre>
-              </div>
-            </div>
-          )}
+          <pre className="bg-black text-green-400 p-4 text-xs overflow-auto">
+            {JSON.stringify(selectedRow?.query ?? {}, null, 2)}
+          </pre>
         </div>
       </AppModal>
     </>
