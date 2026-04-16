@@ -79,9 +79,9 @@ export default function Search() {
   // ===============================
 
   useEffect(() => {
-    if (!searchInput) {
-      setSearchParams({});
-    }
+    // if (!searchInput) {
+    //   setSearchParams({});
+    // }
     const t = setTimeout(() => {
       fetchSuggestions(); // ✅ fetch when typing
     }, 200);
@@ -215,9 +215,9 @@ export default function Search() {
     },
     { key: "brand", label: "Brand", sortable: true },
     { key: "product_type", label: "Product Type", sortable: true },
-    { key: "category", label: "Category",sortable: true },
-    {key: "search_popularity", label: "Search Popularity",  sortable: true},
-    {key: "view_count", label: "View Popularity", sortable: true},
+    { key: "category", label: "Category", sortable: true },
+    // {key: "search_popularity", label: "Search Popularity",  sortable: true},
+    // {key: "view_count", label: "View Popularity", sortable: true},
     {
       key: "actions",
       label: "Actions",
@@ -339,6 +339,8 @@ export default function Search() {
             <div className="flex items-center justify-center border border-gray-200 rounded-lg p-2 h-[42px] w-[42px]">
               <MultiSelect
                 options={[
+                  "Sort by Views",
+                  "Sort by Search Popularity",
                   "Product Name (A → Z)",
                   "Product Name (Z → A)",
                   "Price (Low → High)",

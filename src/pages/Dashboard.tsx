@@ -1,19 +1,35 @@
-import { useState } from "react";
 import { useQuery } from "@tanstack/react-query";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, useSearchParams } from "react-router-dom";
 
 import { dashboardProductSearchKey } from "../api/dashboard";
 
 export default function SearchDashboard() {
   const navigate = useNavigate();
-  const [startDate, setStartDate] = useState<string>("");
-  const [endDate, setEndDate] = useState<string>("");
+
+  // ✅ URL state
+  const [searchParams, setSearchParams] = useSearchParams();
+
+  const startDate = searchParams.get("startDate") || "";
+  const endDate = searchParams.get("endDate") || "";
 
   const { data, isLoading, isError, refetch, isFetching } = useQuery({
     queryKey: ["search-dashboard", startDate, endDate],
     queryFn: () =>
       dashboardProductSearchKey(startDate || null, endDate || null),
   });
+
+  // ✅ helper to update params
+  const updateParam = (key: string, value: string) => {
+    const newParams = new URLSearchParams(searchParams);
+
+    if (value) {
+      newParams.set(key, value);
+    } else {
+      newParams.delete(key);
+    }
+
+    setSearchParams(newParams, { replace: true }); // avoids history spam
+  };
 
   const kpiCard = (
     title: string,
@@ -50,7 +66,7 @@ export default function SearchDashboard() {
               type="date"
               value={startDate}
               max={new Date().toISOString().split("T")[0]}
-              onChange={(e) => setStartDate(e.target.value)}
+              onChange={(e) => updateParam("startDate", e.target.value)}
               className="border rounded-lg px-3 py-1 text-sm focus:outline-none focus:ring-2 focus:ring-gray-300"
             />
           </div>
@@ -61,16 +77,13 @@ export default function SearchDashboard() {
               type="date"
               value={endDate}
               max={new Date().toISOString().split("T")[0]}
-              onChange={(e) => setEndDate(e.target.value)}
+              onChange={(e) => updateParam("endDate", e.target.value)}
               className="border rounded-lg px-3 py-1 text-sm focus:outline-none focus:ring-2 focus:ring-gray-300"
             />
           </div>
 
           <button
-            onClick={() => {
-              setStartDate("");
-              setEndDate("");
-            }}
+            onClick={() => setSearchParams({}, { replace: true })}
             className="text-sm px-3 py-2 bg-gray-100 hover:bg-gray-200 rounded-lg"
           >
             Reset
@@ -114,6 +127,7 @@ export default function SearchDashboard() {
               undefined,
               "/product/search/keyword",
             )}
+
             {kpiCard(
               "Unique Searches",
               data.unique_searches,
@@ -121,6 +135,7 @@ export default function SearchDashboard() {
               undefined,
               "/product/search/keyword",
             )}
+
             {kpiCard(
               "Successful Searches",
               data.successful_searches,
@@ -135,6 +150,7 @@ export default function SearchDashboard() {
               "text-green-600",
               "/product/search/keyword?type=non_zero",
             )}
+
             {kpiCard(
               "Zero Result Searches",
               data.zero_result_searches,
@@ -142,10 +158,12 @@ export default function SearchDashboard() {
               "text-red-500",
               "/product/search/keyword?type=zero",
             )}
+
             {kpiCard(
               "Avg Results/Search",
               data.avg_results_per_search.toFixed(1),
             )}
+
             {kpiCard(
               "Unique Success Keywords",
               data.unique_successful_keywords,
@@ -153,8 +171,9 @@ export default function SearchDashboard() {
               undefined,
               "/product/search/keyword?type=non_zero",
             )}
+
             {kpiCard(
-              "Unique Failed Keywords",
+              "Zero Result Keywords",
               data.unique_failed_keywords,
               undefined,
               undefined,

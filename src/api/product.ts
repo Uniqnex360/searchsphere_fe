@@ -43,6 +43,11 @@ export const fetchProducts = async (filters: {
   // Sort map
   // -----------------------------
   const sortMap: Record<string, { sort_by: string; sort_order: string }> = {
+    "Sort by Views": { sort_by: "view_count", sort_order: "desc" },
+    "Sort by Search Popularity": {
+      sort_by: "search_popularity",
+      sort_order: "desc",
+    },
     "Product Name (A → Z)": { sort_by: "product_name", sort_order: "asc" },
     "Product Name (Z → A)": { sort_by: "product_name", sort_order: "desc" },
     "Price (Low → High)": { sort_by: "base_price", sort_order: "asc" },
