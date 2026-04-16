@@ -95,7 +95,7 @@ export const fetchProductsFilterMeta = async () => {
 };
 
 export const fetchProductDetail = async (id: number | string) => {
-  const res = await api.get(`product/detail/${id}/`);
+  const res = await api.get(`product/detail/${id}/`, { timeout: 0 });
   return res.data;
 };
 

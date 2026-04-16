@@ -13,6 +13,7 @@ export const dashboardProductSearchKey = async (
 
   const res = await api.get<DashboardResponse>(
     `/dashboard/product/search-keywords/?${params.toString()}`,
+    { timeout: 0 },
   );
 
   return res.data;
