@@ -49,7 +49,11 @@ export default function SearchDashboard() {
 
           const queryString = params.toString();
 
-          navigate(queryString ? `${path}?${queryString}` : path);
+          navigate(
+            queryString
+              ? `${path}?${queryString}&fromDashboard=${true}`
+              : `${path}?fromDashboard=${true}`,
+          );
         }
       }}
     >
@@ -193,6 +197,26 @@ export default function SearchDashboard() {
           {isFetching && (
             <p className="text-xs text-gray-400 mt-4">Updating...</p>
           )}
+
+          <div className="h-100 w-ful mt-12">
+            <h1 className="text-2xl font-bold text-gray-800">Product</h1>
+            <div className="mt-8 grid grid-cols-1 md:grid-cols-3 lg:grid-cols-4 gap-4">
+              {kpiCard(
+                "No of Products",
+                data.total_products,
+                undefined,
+                undefined,
+                "/product",
+              )}
+              {kpiCard(
+                "Products in Elastic Search",
+                data.total_es_docs,
+                undefined,
+                undefined,
+                "/product",
+              )}
+            </div>
+          </div>
         </>
       )}
     </div>

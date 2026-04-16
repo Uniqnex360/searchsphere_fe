@@ -25,6 +25,7 @@ const ProductSearchKeyword = () => {
   // ✅ DATE FROM URL (ADDED ONLY)
   const startDate = params.startDate || "";
   const endDate = params.endDate || "";
+  const isKeyword = searchParams.get("fromDashboard") === "true";
 
   const {
     data: listData,
@@ -175,13 +176,25 @@ const ProductSearchKeyword = () => {
       <div className="w-full min-h-screen bg-gray-50">
         {/* Header */}
         <div className="px-8 pt-6 flex justify-between">
-          <div>
-            <h1 className="text-2xl font-semibold text-gray-800">
-              Product Search Keywords
-            </h1>
-            <p className="text-sm text-gray-500 mt-1">
-              Track user search queries and results
-            </p>
+          <div className="flex items-center gap-3">
+            <div>
+              {isKeyword && (
+                <button
+                  onClick={() => navigate(-1)}
+                  className="px-3 cursor-pointer py-2 bg-white border border-gray-300 hover:bg-gray-100 text-gray-700 rounded-lg shadow-sm transition whitespace-nowrap"
+                >
+                  ← Back
+                </button>
+              )}
+            </div>
+            <div>
+              <h1 className="text-2xl font-semibold text-gray-800">
+                Product Search Keywords
+              </h1>
+              <p className="text-sm text-gray-500 mt-1">
+                Track user search queries and results
+              </p>
+            </div>
           </div>
 
           {/* ✅ DATE FILTER ADDED (BEFORE TOTAL - AS YOU WANTED) */}

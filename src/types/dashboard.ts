@@ -10,6 +10,8 @@ export type DashboardResponse = {
   failure_rate_percent: number;
   unique_successful_keywords: number;
   unique_failed_keywords: number;
+  total_products: number;
+  total_es_docs: number;
   top_keyword: {
     q: string | null;
     count: number;
