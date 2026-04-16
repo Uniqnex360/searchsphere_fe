@@ -80,7 +80,7 @@ export default function AppTable({
       <div className="overflow-x-auto">
         {/* vertical scroll */}
         <div ref={divRef} style={{ maxHeight: height, overflowY: "auto" }}>
-          <table className="w-full border-collapse table-fixed">
+          <table className="w-full min-w-max border-collapse">
             <thead className="bg-gray-50 border-b border-gray-300 sticky top-0 z-0">
               <tr>
                 {columns.map((column) => (

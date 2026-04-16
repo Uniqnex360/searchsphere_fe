@@ -213,11 +213,11 @@ export default function Search() {
         );
       },
     },
-    { key: "brand", label: "Brand", width: "150px", sortable: true },
-    { key: "product_type", label: "Product Type", width: "150px", sortable: true },
-    { key: "category", label: "Category", width: "150px", sortable: true },
-    {key: "search_popularity", label: "Search Popularity", width: "150px", sortable: true},
-    {key: "view_count", label: "View Popularity", width: "150px", sortable: true},
+    { key: "brand", label: "Brand", sortable: true },
+    { key: "product_type", label: "Product Type", sortable: true },
+    { key: "category", label: "Category",sortable: true },
+    {key: "search_popularity", label: "Search Popularity",  sortable: true},
+    {key: "view_count", label: "View Popularity", sortable: true},
     {
       key: "actions",
       label: "Actions",
