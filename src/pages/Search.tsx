@@ -257,7 +257,9 @@ export default function Search() {
 
             <div className="flex-1 min-w-0">
               <AutoComplete
-                data={suggestions?.results || []}
+                primaryData={suggestions?.primary_results || []}
+                fallbackData={suggestions?.fallback_results || []}
+                fallbackType={suggestions?.fallback_type}
                 value={searchInput}
                 onChange={setSearchInput}
                 onSelect={triggerSearch}
