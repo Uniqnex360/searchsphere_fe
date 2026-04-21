@@ -39,6 +39,7 @@ type ProductAttribute = {
 
 export type ProductType = {
   id?: number | string;
+  name?: string;
   product_name: string;
   brand: Brand;
   industry: Industry;

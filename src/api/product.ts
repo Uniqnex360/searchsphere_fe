@@ -3,45 +3,46 @@ import { api } from "./axios";
 
 export const fetchProducts = async (filters: {
   q?: string;
-  brands?: string[];
-  category?: string[];
-  product_type?: string[];
-  price?: string[]; // now accepts labels like "$50 - $12,837.5"
+  brand?: string; // Changed from brands to brand to match backend expected key
+  category?: string;
+  product_type?: string;
+  price_min?: number | null;
+  price_max?: number | null;
   sortBy?: string;
   sortDirection?: string;
   page?: number;
+  attr_filters?: Record<string, string[]>; // The dynamic attributes dictionary
 }) => {
-  console.log("price", filters.price);
-
   const params: any = {};
+
+  // 1. Basic Search and Pagination
   if (filters.q) params.q = filters.q;
-  if (filters.brands?.length) params.brand = filters.brands;
-  if (filters.product_type?.length) params.product_type = filters.product_type;
-  if (filters.category?.length) params.category = filters.category;
   if (filters.page) params.page = filters.page;
 
-  // ===============================
-  // HANDLE PRICE LABELS
-  // ===============================
-  if (filters.price?.length) {
-    // Take the first selected price label (singleSelect)
-    const label = filters.price[0];
+  // 2. Standard Filters (passing as strings/comma-separated as per URL state)
+  if (filters.brand) params.brand = filters.brand;
+  if (filters.product_type) params.product_type = filters.product_type;
+  if (filters.category) params.category = filters.category;
 
-    // Parse numbers from string
-    // Example: "$50 - $12,837.5" -> ["50", "12837.5"]
-    const numbers = label
-      .match(/[\d,.]+/g)
-      ?.map((n) => Number(n.replace(/,/g, "")));
-
-    if (numbers && numbers.length === 2) {
-      params.price_min = numbers[0];
-      params.price_max = numbers[1];
-    }
+  // 3. Price Filters
+  if (filters.price_min !== null && filters.price_min !== undefined) {
+    params.price_min = filters.price_min;
+  }
+  if (filters.price_max !== null && filters.price_max !== undefined) {
+    params.price_max = filters.price_max;
   }
 
-  // -----------------------------
-  // Sort map
-  // -----------------------------
+  // 4. Handle Dynamic Attribute Filters
+  // Converts { Color: ["Red", "Blue"] } -> { attr_Color: "Red,Blue" }
+  if (filters.attr_filters) {
+    Object.entries(filters.attr_filters).forEach(([key, values]) => {
+      if (values.length > 0) {
+        params[`attr_${key}`] = values.join(",");
+      }
+    });
+  }
+
+  // 5. Sorting Logic
   const sortMap: Record<string, { sort_by: string; sort_order: string }> = {
     "Sort by Views": { sort_by: "view_count", sort_order: "desc" },
     "Sort by Search Popularity": {
@@ -54,17 +55,19 @@ export const fetchProducts = async (filters: {
     "Price (High → Low)": { sort_by: "base_price", sort_order: "desc" },
   };
 
-  if (
-    filters.sortBy === "brand" ||
-    filters.sortBy === "category" ||
-    filters.sortBy === "product_type" ||
-    filters.sortBy === "search_popularity"
-  ) {
-    ((params.sort_by = filters.sortBy),
-      (params.sort_order = filters.sortDirection));
-  } else if (filters.sortBy === "view_count") {
-    ((params.sort_by = "view_popularity"),
-      (params.sort_order = filters.sortDirection));
+  // Check if it's a raw key (from table headers) or a label (from dropdown)
+  const rawSortKeys = [
+    "brand",
+    "category",
+    "product_type",
+    "search_popularity",
+    "view_count",
+  ];
+
+  if (filters.sortBy && rawSortKeys.includes(filters.sortBy)) {
+    params.sort_by =
+      filters.sortBy === "view_count" ? "view_count" : filters.sortBy;
+    params.sort_order = filters.sortDirection || "desc";
   } else if (filters.sortBy && sortMap[filters.sortBy]) {
     params.sort_by = sortMap[filters.sortBy].sort_by;
     params.sort_order = sortMap[filters.sortBy].sort_order;
@@ -73,13 +76,20 @@ export const fetchProducts = async (filters: {
     params.sort_order = "desc";
   }
 
-  const res = await api.get("product/v6/list/", {
-    params,
-    headers: {
-      "X-FE-URL": window.location.href,
-    },
-  });
-  return res.data;
+  // 6. API Call
+  try {
+    const res = await api.get("product/v6/list/", {
+      params,
+      timeout: 0,
+      headers: {
+        "X-FE-URL": window.location.href,
+      },
+    });
+    return res.data;
+  } catch (error) {
+    console.error("Error fetching products:", error);
+    throw error;
+  }
 };
 
 export const fetchAutosuggestV6 = async (filters: { q?: string }) => {
