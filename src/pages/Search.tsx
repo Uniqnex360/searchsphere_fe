@@ -51,12 +51,18 @@ const AttributeSidebar = ({
   // 3. Process and Sort the attributes groups
   const sortedAttributeGroups = Object.entries(dynamicAttributes).sort(
     ([nameA], [nameB]) => {
-      const isALast = moveToEndList.includes(nameA.toLowerCase());
-      const isBLast = moveToEndList.includes(nameB.toLowerCase());
+      const lowerA = nameA.toLowerCase();
+      const lowerB = nameB.toLowerCase();
+      const isALast = moveToEndList.includes(lowerA);
+      const isBLast = moveToEndList.includes(lowerB);
 
-      if (isALast && !isBLast) return 1; // A goes after B
-      if (!isALast && isBLast) return -1; // A goes before B
-      return 0; // Keep original order otherwise
+      // Priority 1: Move specific items to the end
+      if (isALast && !isBLast) return 1;
+      if (!isALast && isBLast) return -1;
+
+      // Priority 2: If both (or neither) are in the moveToEndList, sort alphabetically
+      // This prevents the order from jumping around when filters are selected
+      return lowerA.localeCompare(lowerB);
     },
   );
 
@@ -67,10 +73,7 @@ const AttributeSidebar = ({
       </h3>
       {sortedAttributeGroups.map(([attrName, options]) => {
         // Hide if in exclude list or only 1 option exists
-        if (
-          excludeList.includes(attrName.toLowerCase()) ||
-          !options
-        ) {
+        if (excludeList.includes(attrName.toLowerCase()) || !options) {
           return null;
         }
 
@@ -311,15 +314,13 @@ export default function Search() {
     const key = `attr_${name}`;
 
     // 3. Create a fresh copy of current params to modify
-    // Assuming 'params' is your current object from useSearchParams()
     const newParams = { ...params };
 
     if (newValues.length > 0) {
       // Update/Add the specific attribute key
       newParams[key] = newValues.join(",");
     } else {
-      // IMPORTANT: Remove the key entirely if no values are selected
-      // This is what allows the "Unselect" to reflect in the UI
+      // Remove the key entirely if no values are selected
       delete newParams[key];
     }
 
