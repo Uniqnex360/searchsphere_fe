@@ -1,13 +1,20 @@
 import { Upload } from "lucide-react";
 import { useState } from "react";
+import { useSearchParams } from "react-router-dom";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import toast from "react-hot-toast";
 
 import { fetchImportList } from "../api/product";
 import { productImport } from "../api/product";
 import AppTable from "../components/AppTable";
+import DateRangePicker from "../components/DateRangePicker";
 
 const BulkUpload = () => {
+
+  const [searchParams] = useSearchParams();
+  const startDate = searchParams.get("startDate") || "";
+  const endDate = searchParams.get("endDate") || "";
+
   //@ts-ignore
   const [file, setFile] = useState<File | null>(null);
   const queryClient = useQueryClient();
@@ -26,8 +33,8 @@ const BulkUpload = () => {
   });
 
   const { data: listData, isLoading } = useQuery({
-    queryKey: ["import-list"],
-    queryFn: () => fetchImportList(),
+    queryKey: ["import-list", startDate, endDate],
+    queryFn: () => fetchImportList(startDate, endDate),
   });
 
   const handleImport = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -91,7 +98,8 @@ const BulkUpload = () => {
           </h1>
         </div>
 
-        <div>
+        <div className="flex gap-4">
+          <DateRangePicker/>
           <label
             className={`flex items-center gap-2 px-4 py-2 border border-gray-300 text-gray-700 rounded-lg hover:bg-gray-50 transition-colors cursor-pointer ${
               mutation.status === "pending"

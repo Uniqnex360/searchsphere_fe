@@ -2,13 +2,13 @@ import { useQuery } from "@tanstack/react-query";
 import { useNavigate, useSearchParams } from "react-router-dom";
 
 import { dashboardProductSearchKey } from "../api/dashboard";
+import DateRangePicker from "../components/DateRangePicker";
 
 export default function SearchDashboard() {
   const navigate = useNavigate();
 
-  // URL state
-  const [searchParams, setSearchParams] = useSearchParams();
-
+  // URL state - Dashboard only needs to READ these for the query
+  const [searchParams] = useSearchParams();
   const startDate = searchParams.get("startDate") || "";
   const endDate = searchParams.get("endDate") || "";
 
@@ -18,17 +18,6 @@ export default function SearchDashboard() {
       dashboardProductSearchKey(startDate || null, endDate || null),
   });
 
-  // helper to update params
-  const updateParam = (key: string, value: string) => {
-    const newParams = new URLSearchParams(searchParams);
-
-    if (value) newParams.set(key, value);
-    else newParams.delete(key);
-
-    setSearchParams(newParams, { replace: true });
-  };
-
-  // ✅ ONLY FIX: normalize URL before adding dates
   const kpiCard = (
     title: string,
     value: string | number,
@@ -41,7 +30,6 @@ export default function SearchDashboard() {
       onClick={() => {
         if (navigateStr) {
           const [path, existingQuery] = navigateStr.split("?");
-
           const params = new URLSearchParams(existingQuery || "");
 
           if (startDate) params.set("startDate", startDate);
@@ -71,37 +59,8 @@ export default function SearchDashboard() {
       <div className="flex flex-col md:flex-row md:items-center justify-between mb-6 gap-4">
         <h1 className="text-2xl font-bold text-gray-800">Search Dashboard</h1>
 
-        {/* DATE FILTER */}
-        <div className="flex items-center gap-3 bg-white p-3 rounded-xl shadow-sm border border-gray-200">
-          <div className="flex flex-col">
-            <label className="text-xs text-gray-500">Start Date</label>
-            <input
-              type="date"
-              value={startDate}
-              max={new Date().toISOString().split("T")[0]}
-              onChange={(e) => updateParam("startDate", e.target.value)}
-              className="border rounded-lg px-3 py-1 text-sm"
-            />
-          </div>
-
-          <div className="flex flex-col">
-            <label className="text-xs text-gray-500">End Date</label>
-            <input
-              type="date"
-              value={endDate}
-              max={new Date().toISOString().split("T")[0]}
-              onChange={(e) => updateParam("endDate", e.target.value)}
-              className="border rounded-lg px-3 py-1 text-sm"
-            />
-          </div>
-
-          <button
-            onClick={() => setSearchParams({}, { replace: true })}
-            className="text-sm px-3 py-2 bg-gray-100 hover:bg-gray-200 rounded-lg"
-          >
-            Reset
-          </button>
-        </div>
+        {/* REUSABLE DATE FILTER COMPONENT */}
+        <DateRangePicker />
       </div>
 
       {/* LOADING */}

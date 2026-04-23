@@ -153,7 +153,15 @@ export const productImport = async (file: File) => {
   return response.data;
 };
 
-export const fetchImportList = async () => {
-  const res = await api.get("import/list/");
+export const fetchImportList = async (startDate?: string, endDate?: string) => {
+  // 1. Create a params object
+  const params: Record<string, string> = {};
+  // 2. Only add dates if they actually exist
+  if (startDate) params.start_date = startDate;
+  if (endDate) params.end_date = endDate;
+  // 3. Use axios/api config to handle the query string automatically
+  // This is cleaner than manual string interpolation
+  const res = await api.get(`import/list/`, { params });
+
   return res.data;
 };

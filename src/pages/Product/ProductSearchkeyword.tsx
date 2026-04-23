@@ -7,6 +7,7 @@ import AppTable from "../../components/AppTable";
 import AppPagination from "../../components/AppPagination";
 import AppModal from "../../components/AppModal";
 import { fetchProductSearchKeyword } from "../../api/product";
+import DateRangePicker from "../../components/DateRangePicker";
 
 const ProductSearchKeyword = () => {
   const navigate = useNavigate();
@@ -22,7 +23,7 @@ const ProductSearchKeyword = () => {
   const page = Number(params.page) || 1;
   const type = params.type || "all";
 
-  // ✅ DATE FROM URL (ADDED ONLY)
+  // These are now driven by the URL (via DateRangePicker)
   const startDate = params.startDate || "";
   const endDate = params.endDate || "";
   const isKeyword = searchParams.get("fromDashboard") === "true";
@@ -54,14 +55,13 @@ const ProductSearchKeyword = () => {
       }),
   });
 
+  // Simplified updateParams (only handles non-date filters like Search and Page)
   const updateParams = (newParams: Record<string, string>) => {
     const updated = new URLSearchParams(searchParams);
-
     Object.entries(newParams).forEach(([key, value]) => {
       if (value) updated.set(key, value);
       else updated.delete(key);
     });
-
     setSearchParams(updated);
   };
 
@@ -92,9 +92,7 @@ const ProductSearchKeyword = () => {
       sortable: true,
       render: (_: any, row: any) => {
         const value = row?.q;
-
         if (!value) return "--";
-
         const trimmed = value.trim();
         const cleanValue =
           trimmed.startsWith('"') && trimmed.endsWith('"')
@@ -116,20 +114,15 @@ const ProductSearchKeyword = () => {
       label: "URL",
       render: (_: any, row: any) => {
         if (!row?.url) return "--";
-
         return (
           <button
             onClick={() => {
               try {
                 const urlObj = new URL(row.url);
                 const urlParams = new URLSearchParams(urlObj.search);
-
                 urlParams.delete("isKeyword");
-
-                // preserve date
                 if (startDate) urlParams.set("startDate", startDate);
                 if (endDate) urlParams.set("endDate", endDate);
-
                 navigate(`/product?${urlParams.toString()}&isKeyword=true`);
               } catch (e) {
                 console.error("Invalid URL:", row.url);
@@ -175,73 +168,36 @@ const ProductSearchKeyword = () => {
     <>
       <div className="w-full min-h-screen bg-gray-50">
         {/* Header */}
-        <div className="px-8 pt-6 flex justify-between">
+        <div className="px-8 pt-6 flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
           <div className="flex items-center gap-3">
-            <div>
-              {isKeyword && (
-                <button
-                  onClick={() => navigate(-1)}
-                  className="px-3 cursor-pointer py-2 bg-white border border-gray-300 hover:bg-gray-100 text-gray-700 rounded-lg shadow-sm transition whitespace-nowrap"
-                >
-                  ← Back
-                </button>
-              )}
-            </div>
+            {isKeyword && (
+              <button
+                onClick={() => navigate(-1)}
+                className="px-3 cursor-pointer py-2 bg-white border border-gray-300 hover:bg-gray-100 text-gray-700 rounded-lg shadow-sm transition whitespace-nowrap"
+              >
+                ← Back
+              </button>
+            )}
             <div>
               <h1 className="text-2xl font-semibold text-gray-800">
                 Product Search Keywords
               </h1>
-              <p className="text-sm text-gray-500 mt-1">
+              <p className="text-sm text-gray-500">
                 Track user search queries and results
               </p>
             </div>
           </div>
 
-          {/* ✅ DATE FILTER ADDED (BEFORE TOTAL - AS YOU WANTED) */}
-          <div className="px-8 pt-4 flex gap-3 items-end">
-            <div className="flex flex-col">
-              <label className="text-xs text-gray-500">Start Date</label>
-              <input
-                type="date"
-                value={startDate}
-                onChange={(e) => updateParams({ startDate: e.target.value })}
-                className="border px-2 py-1 rounded text-sm"
-              />
-            </div>
+          <div className="flex flex-col md:flex-row items-end gap-4">
+            {/* ✅ REUSABLE DATE FILTER COMPONENT */}
+            <DateRangePicker />
 
-            <div className="flex flex-col">
-              <label className="text-xs text-gray-500">End Date</label>
-              <input
-                type="date"
-                value={endDate}
-                onChange={(e) => updateParams({ endDate: e.target.value })}
-                className="border px-2 py-1 rounded text-sm"
-              />
-            </div>
-
-            <div>
-              <button
-                onClick={() =>
-                  setSearchParams((prev) => {
-                    const p = new URLSearchParams(prev);
-                    p.delete("startDate");
-                    p.delete("endDate");
-                    return p;
-                  })
-                }
-                className="text-sm px-3 py-1 bg-gray-100 rounded hover:bg-gray-200"
-              >
-                Reset
-              </button>
-            </div>
-
-            {/* ❗ OLD TOTAL (UNCHANGED) */}
-            <div className="mt-auto">
-              <p className="text-sm text-gray-600">
-                Total search count: {listData?.meta?.total}
+            <div className="bg-white p-3 rounded-xl ">
+              <p className="text-sm text-gray-700">
+                Search Keywords: {listData?.meta?.total ?? 0}
               </p>
-              <p className="text-sm text-gray-600">
-                Total unique count: {listData?.meta?.unique}
+              <p className="text-sm text-gray-700">
+                Unique Keywords: {listData?.meta?.unique ?? 0}
               </p>
             </div>
           </div>
@@ -251,7 +207,6 @@ const ProductSearchKeyword = () => {
         <div className="px-8 pt-6">
           <div className="relative w-full">
             <SearchIcon className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400 w-4 h-4" />
-
             <input
               type="text"
               value={searchQuery}
@@ -261,7 +216,6 @@ const ProductSearchKeyword = () => {
               placeholder="Search keywords"
               className="w-full rounded-md pl-10 pr-10 py-2 outline-none focus:ring-2 focus:ring-blue-500 bg-[#F1F5F9]"
             />
-
             {searchQuery && (
               <X
                 className="absolute right-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400 cursor-pointer hover:text-gray-600"
@@ -272,16 +226,17 @@ const ProductSearchKeyword = () => {
         </div>
 
         {/* Clear All */}
-        {(params.search || sortKey) && (
-          <div className="flex justify-end mr-4">
+        {(params.search || sortKey || startDate || endDate) && (
+          <div className="flex justify-end mr-8 mt-2">
             <button
-              className="ml-auto px-3 py-1 text-[12px] text-red-700 hover:text-red-900 rounded transition cursor-pointer"
+              className="px-3 py-1 text-[12px] text-red-700 hover:text-red-900 rounded transition cursor-pointer"
               onClick={() => {
                 setSearchParams({});
                 setSortKey("");
+                setSortDirection("asc");
               }}
             >
-              Clear All
+              Clear All Filters
             </button>
           </div>
         )}
@@ -321,7 +276,6 @@ const ProductSearchKeyword = () => {
         </div>
       </div>
 
-      {/* Modal */}
       <AppModal
         isOpen={viewModal}
         onClose={handleCloseModal}
