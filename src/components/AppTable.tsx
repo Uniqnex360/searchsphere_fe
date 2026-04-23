@@ -106,7 +106,7 @@ export default function AppTable({
                               />
                             )
                           ) : (
-                            <ChevronDown size={14} className="text-gray-300" />
+                            <ChevronDown size={14} className="text-gray-800" />
                           )}
                         </span>
                       </button>

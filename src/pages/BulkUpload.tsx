@@ -93,7 +93,7 @@ const BulkUpload = () => {
       {/* header */}
       <div className="w-full h-[15%] flex items-center justify-between px-8 border-b border-b-gray-200">
         <div>
-          <h1 className="text-2xl font-semibold text-gray-800">
+          <h1 className="text-2xl font-bold text-gray-800">
             Import Product Data
           </h1>
         </div>

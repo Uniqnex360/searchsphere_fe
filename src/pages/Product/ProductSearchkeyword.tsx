@@ -179,7 +179,7 @@ const ProductSearchKeyword = () => {
               </button>
             )}
             <div>
-              <h1 className="text-2xl font-semibold text-gray-800">
+              <h1 className="text-2xl font-bold text-gray-800">
                 Product Search Keywords
               </h1>
               <p className="text-sm text-gray-500">
@@ -267,6 +267,18 @@ const ProductSearchKeyword = () => {
             sortDirection={sortDirection}
             onSort={handleSort}
           />
+
+          <div className="flex justify-end">
+            <AppPagination
+              total={listData?.meta?.unique || 0}
+              page={page}
+              size={50}
+              onPageChange={(p) => {
+                updateParams({ page: String(p) });
+                window.scrollTo({ top: 0, behavior: "smooth" });
+              }}
+            />
+          </div>
 
           {!isLoading && !listData?.data?.length && (
             <div className="text-center text-gray-500 text-sm">

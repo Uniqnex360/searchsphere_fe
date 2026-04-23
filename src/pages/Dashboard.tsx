@@ -57,7 +57,7 @@ export default function SearchDashboard() {
     <div className="p-6 bg-gray-50 min-h-screen">
       {/* HEADER */}
       <div className="flex flex-col md:flex-row md:items-center justify-between mb-6 gap-4">
-        <h1 className="text-2xl font-bold text-gray-800">Search Dashboard</h1>
+        <h1 className="text-2xl font-bold text-gray-800">Dashboard</h1>
 
         {/* REUSABLE DATE FILTER COMPONENT */}
         <DateRangePicker />

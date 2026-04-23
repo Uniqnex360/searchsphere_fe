@@ -413,7 +413,10 @@ export default function Search() {
   return (
     <div className="flex flex-col h-screen w-full bg-gray-50">
       {/* HEADER SECTION */}
-      <div className="bg-white shadow-sm sticky top-0 z-50">
+      <div className="bg-white shadow-sm sticky top-0 z-50 ">
+        <div className="p-6">
+          <h1 className="text-2xl font-bold text-gray-800">Product</h1>
+        </div>
         <div className="h-[65px] flex items-center justify-between px-5 gap-4">
           <div className="flex items-center gap-3 flex-1 min-w-0">
             {isKeyword && (
@@ -507,6 +510,12 @@ export default function Search() {
                   "Product Name (Z → A)",
                   "Price (Low → High)",
                   "Price (High → Low)",
+                  "Brand (A -> Z)",
+                  "Brand (Z -> A)",
+                  "Category (A -> Z)",
+                  "Category (Z -> A)",
+                  "Product Type (A -> Z)",
+                  "Product Type (Z -> A)",
                 ]}
                 value={filters.sortBy ? [filters.sortBy] : []}
                 onChange={(v) =>
@@ -595,14 +604,28 @@ export default function Search() {
               ))}
             </div>
           ) : (
-            <AppTable
-              columns={columns}
-              data={productList?.data?.results || []}
-              isLoading={isLoading}
-              sortKey={filters.sortBy}
-              sortDirection={filters.sortDirection as any}
-              onSort={handleSort}
-            />
+            <>
+              <AppTable
+                columns={columns}
+                data={productList?.data?.results || []}
+                isLoading={isLoading}
+                sortKey={filters.sortBy}
+                sortDirection={filters.sortDirection as any}
+                onSort={handleSort}
+              />
+
+              <div className="flex justify-end items-center mr-4 p-2 gap-2">
+                <AppPagination
+                  total={productList?.data?.total_docs_after_filter || 0}
+                  page={page}
+                  size={size}
+                  onPageChange={(p) => {
+                    updateParams({ page: String(p) });
+                    window.scrollTo({ top: 0, behavior: "smooth" });
+                  }}
+                />
+              </div>
+            </>
           )}
         </div>
       </div>
