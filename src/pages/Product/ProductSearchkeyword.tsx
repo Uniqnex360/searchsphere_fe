@@ -123,7 +123,7 @@ const ProductSearchKeyword = () => {
                 urlParams.delete("isKeyword");
                 if (startDate) urlParams.set("startDate", startDate);
                 if (endDate) urlParams.set("endDate", endDate);
-                navigate(`/product?${urlParams.toString()}&isKeyword=true`);
+                navigate(`/product/search/keyword/result/${row.id}?${urlParams.toString()}&isKeyword=true`);
               } catch (e) {
                 console.error("Invalid URL:", row.url);
               }
