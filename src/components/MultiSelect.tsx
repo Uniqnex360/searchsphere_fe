@@ -13,6 +13,9 @@ interface Props {
 
   triggerType?: "box" | "icon";
   icon?: ReactNode;
+
+  // ✅ NEW: send search text to parent
+  onSearchApply?: (search: string) => void;
 }
 
 export function MultiSelect({
@@ -25,6 +28,7 @@ export function MultiSelect({
   singleSelect = false,
   triggerType = "box",
   icon,
+  onSearchApply,
 }: Props) {
   const [isOpen, setIsOpen] = useState(false);
   const [search, setSearch] = useState("");
@@ -64,11 +68,20 @@ export function MultiSelect({
     }
   };
 
+  // ✅ APPLY BUTTON LOGIC (UPDATED)
   const applySelection = () => {
     onChange(tempValue);
+
+    // send search query to parent
+    if (search.trim()) {
+      onSearchApply?.(search.trim());
+    }
+
+    setSearch(""); // clear search after apply
     setIsOpen(false);
   };
 
+  // close dropdown on outside click
   useEffect(() => {
     function handleClickOutside(event: MouseEvent) {
       if (
@@ -77,6 +90,7 @@ export function MultiSelect({
       ) {
         setIsOpen(false);
         setTempValue(value);
+        setSearch(""); // clear search on close
       }
     }
 
@@ -94,14 +108,20 @@ export function MultiSelect({
       {triggerType === "icon" ? (
         <div
           className="cursor-pointer text-gray-600"
-          onClick={() => setIsOpen((p) => !p)}
+          onClick={() => {
+            setIsOpen((p) => !p);
+            setSearch(""); // clear search when opening
+          }}
         >
           {icon || <ChevronDown size={20} />}
         </div>
       ) : (
         <div
           className="flex items-center gap-1 w-full px-3 py-2 border border-gray-200 rounded-lg cursor-pointer bg-white"
-          onClick={() => setIsOpen((p) => !p)}
+          onClick={() => {
+            setIsOpen((p) => !p);
+            setSearch(""); // clear search when opening
+          }}
         >
           {value.length === 0 && (
             <span className="text-sm text-gray-400 truncate">
@@ -155,7 +175,7 @@ export function MultiSelect({
       {/* DROPDOWN */}
       {isOpen && (
         <div className="absolute z-[1000] mt-1 w-[260px] bg-white border border-gray-200 rounded-lg shadow-lg max-h-[450px] flex flex-col">
-          {/* STICKY HEADER */}
+          {/* HEADER */}
           <div className="sticky top-0 bg-white border-b z-10">
             {searchable && (
               <div className="p-2">

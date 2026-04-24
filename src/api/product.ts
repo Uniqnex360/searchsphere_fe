@@ -72,6 +72,7 @@ export const fetchProducts = async (filters: {
     "product_type",
     "search_popularity",
     "view_count",
+    "review",
   ];
 
   if (filters.sortBy && rawSortKeys.includes(filters.sortBy)) {

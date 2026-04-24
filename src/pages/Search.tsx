@@ -1,5 +1,12 @@
 import { useState, useEffect } from "react";
-import { List, LayoutGrid, Eye, DollarSign, ArrowDownUp, Star } from "lucide-react";
+import {
+  List,
+  LayoutGrid,
+  Eye,
+  DollarSign,
+  ArrowDownUp,
+  Star,
+} from "lucide-react";
 import { useQuery } from "@tanstack/react-query";
 import { useNavigate, useSearchParams } from "react-router-dom";
 import { AutoComplete } from "../components/AutoComplete";
@@ -392,6 +399,7 @@ export default function Search() {
     {
       key: "review",
       label: "Review",
+      sortable: true,
       render: (_: any, row: ProductType) => {
         const rating = Math.round(row?.review || 0); // or keep float logic if needed
         const stars = 5;
@@ -487,6 +495,13 @@ export default function Search() {
             options={productList?.data?.facets?.brands || []}
             value={filters.brands}
             onChange={(v) => updateParams({ brand: v.join(","), page: "1" })}
+            // onChange={(v) => updateParams({ brand: v.join(","), page: "1" })}
+            onSearchApply={(text: string) => {
+              updateParams({
+                brand: text, // 👈 this is what you want (apple → URL)
+                page: "1",
+              });
+            }}
             placeholder="Filter by Brands"
           />
           <MultiSelect
@@ -495,12 +510,24 @@ export default function Search() {
             onChange={(v) =>
               updateParams({ product_type: v.join(","), page: "1" })
             }
+            onSearchApply={(text: string) => {
+              updateParams({
+                product_type: text, // 👈 this is what you want (apple → URL)
+                page: "1",
+              });
+            }}
             placeholder="Filter by Product Type"
           />
           <MultiSelect
             options={productList?.data?.facets?.categories || []}
             value={filters.category}
             onChange={(v) => updateParams({ category: v.join(","), page: "1" })}
+            onSearchApply={(text: string) => {
+              updateParams({
+                category: text, // 👈 this is what you want (apple → URL)
+                page: "1",
+              });
+            }}
             placeholder="Filter by category"
           />
           <div className="flex items-center gap-1 w-fit justify-self-start">
