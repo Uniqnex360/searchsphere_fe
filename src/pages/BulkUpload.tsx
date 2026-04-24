@@ -111,7 +111,7 @@ const BulkUpload = () => {
             {mutation.status === "pending" ? "Uploading..." : "Import"}
             <input
               type="file"
-              accept=".csv"
+              accept=".xlsx"
               onChange={handleImport}
               className="hidden"
               disabled={mutation.status === "pending"}

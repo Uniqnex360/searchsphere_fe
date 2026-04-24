@@ -59,6 +59,10 @@ export const fetchProducts = async (filters: {
     "Category (Z -> A)": { sort_by: "category", sort_order: "desc" },
     "Product Type (A -> Z)": { sort_by: "product_type", sort_order: "asc" },
     "Product Type (Z -> A)": { sort_by: "product_type", sort_order: "desc" },
+    "Latest products": { sort_by: "created_at", sort_order: "desc" },
+    "Oldest products": { sort_by: "created_at", sort_order: "asc" },
+    "Top Reviews": { sort_by: "review", sort_order: "desc" },
+    "Low Reviews": { sort_by: "review", sort_order: "asc" },
   };
 
   // Check if it's a raw key (from table headers) or a label (from dropdown)

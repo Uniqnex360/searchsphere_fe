@@ -29,7 +29,7 @@ type Category = {
 type Brand = {
   id: number | string;
   brand_name: string;
-}
+};
 
 type ProductAttribute = {
   id: number | string;
@@ -49,6 +49,7 @@ export type ProductType = {
   sku: string | null;
   stock_qty: number | null;
   mpn: string | null;
+  review?: number;
   long_description: string;
   base_price: number | null;
   images: ProductImage[];

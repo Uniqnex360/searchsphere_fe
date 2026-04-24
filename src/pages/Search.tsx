@@ -1,5 +1,5 @@
 import { useState, useEffect } from "react";
-import { List, LayoutGrid, Eye, DollarSign, ArrowDownUp } from "lucide-react";
+import { List, LayoutGrid, Eye, DollarSign, ArrowDownUp, Star } from "lucide-react";
 import { useQuery } from "@tanstack/react-query";
 import { useNavigate, useSearchParams } from "react-router-dom";
 import { AutoComplete } from "../components/AutoComplete";
@@ -390,6 +390,30 @@ export default function Search() {
     { key: "product_type", label: "Product Type", sortable: true },
     { key: "category", label: "Category", sortable: true },
     {
+      key: "review",
+      label: "Review",
+      render: (_: any, row: ProductType) => {
+        const rating = Math.round(row?.review || 0); // or keep float logic if needed
+        const stars = 5;
+
+        return (
+          <div className="flex items-center gap-1">
+            {Array.from({ length: stars }).map((_, index) => (
+              <Star
+                key={index}
+                size={16}
+                className={
+                  index < rating
+                    ? "text-yellow-400 fill-yellow-400"
+                    : "text-gray-300"
+                }
+              />
+            ))}
+          </div>
+        );
+      },
+    },
+    {
       key: "actions",
       label: "Actions",
       width: "100px",
@@ -516,6 +540,9 @@ export default function Search() {
                   "Category (Z -> A)",
                   "Product Type (A -> Z)",
                   "Product Type (Z -> A)",
+                  "Latest products",
+                  "Oldest products",
+                  "Top Reviews",
                 ]}
                 value={filters.sortBy ? [filters.sortBy] : []}
                 onChange={(v) =>
