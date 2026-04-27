@@ -12,6 +12,7 @@ export const fetchProducts = async (filters: {
   sortDirection?: string;
   page?: number;
   attr_filters?: Record<string, string[]>;
+  end_date?: string;
 }) => {
   const params: any = {};
 
@@ -27,6 +28,8 @@ export const fetchProducts = async (filters: {
   // 3. Price
   if (filters.price_min != null) params.price_min = filters.price_min;
   if (filters.price_max != null) params.price_max = filters.price_max;
+
+  if (filters.end_date != null) params.end_date = filters.end_date;
 
   // 4. Attributes (keep your existing logic)
   if (filters.attr_filters) {
@@ -257,7 +260,6 @@ export const fetchProductSearchKeyword = async (filters: {
     },
   });
 
-  console.log("response", res.data);
   return res.data;
 };
 

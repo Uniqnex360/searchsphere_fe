@@ -230,6 +230,7 @@ export default function Search() {
       : [],
     price_min: params.price_min || null,
     price_max: params.price_max || null,
+    end_date: params.end_date || null,
     sortBy: params.sortBy || "",
     sortDirection: params.sortDirection || "desc",
     attributes: getDynamicAttrsFromURL(),
@@ -303,6 +304,7 @@ export default function Search() {
         price_max: filters.price_max,
         sortBy: filters.sortBy,
         sortDirection: filters.sortDirection,
+        end_date: filters.end_date || undefined,
         attr_filters: filters.attributes, // Passed as dynamic object
         page,
       }),
