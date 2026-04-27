@@ -245,19 +245,38 @@ export const fetchProductSearchKeyword = async (filters: {
   nonZero?: boolean;
   start_date?: string;
   end_date?: string;
+
+  brand?: string;
+  category?: string;
+  product_type?: string;
 }) => {
-  const { nonZero, ...rest } = filters;
+  const { nonZero, brand, category, product_type, ...rest } = filters;
 
   let result_type = "all";
 
   if (nonZero === true) result_type = "non_zero";
   else if (nonZero === false) result_type = "zero";
 
+  const params: any = {
+    ...rest,
+    result_type,
+  };
+
+  // ✅ IMPORTANT FIX: backend expects brand[]
+  if (brand?.length) {
+    params["brand[]"] = brand.split(",").filter(Boolean);
+  }
+
+  if (category?.length) {
+    params["category[]"] = category.split(",").filter(Boolean);
+  }
+
+  if (product_type?.length) {
+    params["product_type[]"] = product_type.split(",").filter(Boolean);
+  }
+
   const res = await api.get("product/search/keywords/", {
-    params: {
-      ...rest,
-      result_type,
-    },
+    params,
   });
 
   return res.data;

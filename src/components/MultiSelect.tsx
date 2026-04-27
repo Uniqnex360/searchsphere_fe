@@ -60,12 +60,11 @@ export function MultiSelect({
 
     setTempValue((prev) => {
       const isRemoving = prev.includes(option);
-
       const updated = isRemoving
         ? prev.filter((v) => v !== option)
         : [...prev, option];
 
-      setSearch("");
+      // ✅ Search stays while selecting
       return updated;
     });
   };
@@ -79,18 +78,23 @@ export function MultiSelect({
   };
 
   const applySelection = () => {
+    // 1. Update the actual state with selected items (Apple, Ant)
     onChange(tempValue);
 
     const typedValue = search.trim();
 
+    // ✅ FIX: Prioritize selected items for the URL/Callback
     if (tempValue.length > 0) {
-      onSearchApply?.(tempValue.join(", "));
+      // This sends "Apple, Ant" to your URL/Search handler
+      onSearchApply?.(tempValue.join(","));
     }
-
-    if (typedValue && !options.includes(typedValue)) {
+    // 2. Only if NO items are checked, send the raw typed string (the "a")
+    else if (typedValue) {
       onSearchApply?.(typedValue);
     }
 
+    // ✅ Clear search ONLY on OK
+    setSearch("");
     setIsOpen(false);
   };
 
@@ -117,11 +121,8 @@ export function MultiSelect({
 
   return (
     <div className="relative inline-block w-full" ref={wrapperRef}>
-      {/* =========================
-          ✅ FIXED TRIGGER SECTION
-      ========================= */}
+      {/* TRIGGER SECTION */}
       {triggerType === "icon" ? (
-        // 🔥 ICON TRIGGER MODE (FIXED)
         <div
           className="flex items-center justify-center cursor-pointer text-gray-700"
           onClick={() => setIsOpen((p) => !p)}
@@ -133,7 +134,6 @@ export function MultiSelect({
           )}
         </div>
       ) : (
-        // 🔥 BOX TRIGGER MODE (your original UI unchanged)
         <div
           className="flex items-center gap-1 w-full px-3 py-2 border border-gray-200 rounded-lg cursor-pointer bg-white"
           onClick={() => setIsOpen((p) => !p)}
@@ -156,15 +156,12 @@ export function MultiSelect({
                   className="flex items-center gap-1 px-2 py-1 text-xs bg-blue-100 text-blue-700 rounded"
                 >
                   {val}
-
                   {!singleSelect && (
                     <X
                       size={12}
                       onClick={(e) => {
                         e.stopPropagation();
-
                         const updated = displayValues.filter((v) => v !== val);
-
                         setTempValue(updated);
                         onChange(updated);
                         setSearch("");
@@ -193,7 +190,7 @@ export function MultiSelect({
             <div className="p-2 flex justify-end">
               <button
                 onClick={applySelection}
-                className="px-3 py-1 text-sm bg-blue-600 text-white rounded"
+                className="px-3 py-1 text-sm bg-blue-600 text-white rounded cursor-pointer font-medium hover:bg-blue-700 transition-colors"
               >
                 OK
               </button>
@@ -204,7 +201,7 @@ export function MultiSelect({
             <div className="p-2">
               <input
                 type="text"
-                className="w-full px-2 py-1 text-sm border border-gray-200 rounded outline-none"
+                className="w-full px-2 py-1 text-sm border border-gray-200 rounded outline-none focus:border-blue-500"
                 placeholder="Search..."
                 value={search}
                 onChange={(e) => setSearch(e.target.value)}

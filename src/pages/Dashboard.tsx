@@ -3,6 +3,7 @@ import { useNavigate, useSearchParams } from "react-router-dom";
 
 import { dashboardProductSearchKey } from "../api/dashboard";
 import DateRangePicker from "../components/DateRangePicker";
+import AppCustomCalendar from "../components/AppCustomCalendar";
 
 export default function SearchDashboard() {
   const navigate = useNavigate();
@@ -59,8 +60,10 @@ export default function SearchDashboard() {
       <div className="flex flex-col md:flex-row md:items-center justify-between mb-6 gap-4">
         <h1 className="text-2xl font-bold text-gray-800">Dashboard</h1>
 
-        {/* REUSABLE DATE FILTER COMPONENT */}
-        <DateRangePicker />
+        <div className="flex items-center justify-center gap-6">
+          <AppCustomCalendar />
+          <DateRangePicker />
+        </div>
       </div>
 
       {/* LOADING */}

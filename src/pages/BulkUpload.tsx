@@ -8,6 +8,7 @@ import { fetchImportList } from "../api/product";
 import { productImport } from "../api/product";
 import AppTable from "../components/AppTable";
 import DateRangePicker from "../components/DateRangePicker";
+import AppCustomCalendar from "../components/AppCustomCalendar";
 
 const BulkUpload = () => {
   const [searchParams] = useSearchParams();
@@ -126,7 +127,10 @@ const BulkUpload = () => {
         </div>
 
         <div className="flex gap-4">
-          <DateRangePicker />
+          <div className="flex justify-center items-center gap-6">
+            <AppCustomCalendar />
+            <DateRangePicker />
+          </div>
           <label
             className={`flex items-center gap-2 px-4 py-2 border border-gray-300 text-gray-700 rounded-lg hover:bg-gray-50 transition-colors cursor-pointer ${
               mutation.status === "pending"
