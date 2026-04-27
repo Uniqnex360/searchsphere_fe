@@ -209,9 +209,25 @@ export default function Search() {
 
   const filters = {
     q: params.q || "",
-    brands: params.brand ? params.brand.split(",") : [], // Match backend 'brand' key
-    product_type: params.product_type ? params.product_type.split(",") : [],
-    category: params.category ? params.category.split(",") : [],
+    brands: params.brand
+      ? params.brand
+          .split(",")
+          .map((v) => v.trim())
+          .filter(Boolean)
+      : [], // Match backend 'brand' key
+    product_type: params.product_type
+      ? params.product_type
+          .split(",")
+          .map((v) => v.trim())
+          .filter(Boolean)
+      : [],
+
+    category: params.category
+      ? params.category
+          .split(",")
+          .map((v) => v.trim())
+          .filter(Boolean)
+      : [],
     price_min: params.price_min || null,
     price_max: params.price_max || null,
     sortBy: params.sortBy || "",
@@ -278,9 +294,9 @@ export default function Search() {
     queryFn: () =>
       fetchProducts({
         q: filters.q,
-        brand: filters.brands.join(","), // Send as comma-separated string
-        product_type: filters.product_type.join(","),
-        category: filters.category.join(","),
+        brand: filters.brands, // Send as comma-separated string
+        product_type: filters.product_type,
+        category: filters.category,
         //@ts-ignore
         price_min: filters.price_min,
         //@ts-ignore

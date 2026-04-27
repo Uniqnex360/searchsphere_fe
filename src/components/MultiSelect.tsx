@@ -10,11 +10,8 @@ interface Props {
   searchable?: boolean;
   selectAllLabel?: string;
   singleSelect?: boolean;
-
   triggerType?: "box" | "icon";
   icon?: ReactNode;
-
-  // ✅ NEW: send search text to parent
   onSearchApply?: (search: string) => void;
 }
 
@@ -40,48 +37,63 @@ export function MultiSelect({
     setTempValue(value);
   }, [value]);
 
+  useEffect(() => {
+    if (isOpen) {
+      setTempValue(value);
+    }
+  }, [isOpen]);
+
   const filteredOptions = searchable
     ? options.filter((opt) => opt.toLowerCase().includes(search.toLowerCase()))
     : options;
 
-  const allSelected = options.length > 0 && tempValue.length === options.length;
+  const allSelected =
+    options.length > 0 && options.every((opt) => tempValue.includes(opt));
 
   const toggleOption = (option: string) => {
     if (singleSelect) {
       onChange([option]);
+      setSearch("");
       setIsOpen(false);
       return;
     }
 
-    if (tempValue.includes(option)) {
-      setTempValue(tempValue.filter((v) => v !== option));
-    } else {
-      setTempValue([...tempValue, option]);
-    }
+    setTempValue((prev) => {
+      const isRemoving = prev.includes(option);
+
+      const updated = isRemoving
+        ? prev.filter((v) => v !== option)
+        : [...prev, option];
+
+      setSearch("");
+      return updated;
+    });
   };
 
   const toggleSelectAll = () => {
     if (allSelected) {
       setTempValue([]);
     } else {
-      setTempValue(options);
+      setTempValue([...options]);
     }
   };
 
-  // ✅ APPLY BUTTON LOGIC (UPDATED)
   const applySelection = () => {
     onChange(tempValue);
 
-    // send search query to parent
-    if (search.trim()) {
-      onSearchApply?.(search.trim());
+    const typedValue = search.trim();
+
+    if (tempValue.length > 0) {
+      onSearchApply?.(tempValue.join(", "));
     }
 
-    setSearch(""); // clear search after apply
+    if (typedValue && !options.includes(typedValue)) {
+      onSearchApply?.(typedValue);
+    }
+
     setIsOpen(false);
   };
 
-  // close dropdown on outside click
   useEffect(() => {
     function handleClickOutside(event: MouseEvent) {
       if (
@@ -89,71 +101,73 @@ export function MultiSelect({
         !wrapperRef.current.contains(event.target as Node)
       ) {
         setIsOpen(false);
-        setTempValue(value);
-        setSearch(""); // clear search on close
       }
     }
 
     document.addEventListener("mousedown", handleClickOutside);
     return () => document.removeEventListener("mousedown", handleClickOutside);
-  }, [value]);
+  }, []);
 
-  const visibleValues = value.slice(0, 2);
-  const remainingCount = value.length - 2;
-  const isAll = options.length > 0 && value.length === options.length;
+  const displayValues = isOpen ? tempValue : value;
+  const visibleValues = displayValues.slice(0, 2);
+  const remainingCount = displayValues.length - 2;
+
+  const isAll =
+    options.length > 0 && options.every((opt) => displayValues.includes(opt));
 
   return (
     <div className="relative inline-block w-full" ref={wrapperRef}>
-      {/* TRIGGER */}
+      {/* =========================
+          ✅ FIXED TRIGGER SECTION
+      ========================= */}
       {triggerType === "icon" ? (
+        // 🔥 ICON TRIGGER MODE (FIXED)
         <div
-          className="cursor-pointer text-gray-600"
-          onClick={() => {
-            setIsOpen((p) => !p);
-            setSearch(""); // clear search when opening
-          }}
+          className="flex items-center justify-center cursor-pointer text-gray-700"
+          onClick={() => setIsOpen((p) => !p)}
         >
-          {icon || <ChevronDown size={20} />}
+          {icon ? (
+            <div className="flex items-center justify-center">{icon}</div>
+          ) : (
+            <ChevronDown size={20} />
+          )}
         </div>
       ) : (
+        // 🔥 BOX TRIGGER MODE (your original UI unchanged)
         <div
           className="flex items-center gap-1 w-full px-3 py-2 border border-gray-200 rounded-lg cursor-pointer bg-white"
-          onClick={() => {
-            setIsOpen((p) => !p);
-            setSearch(""); // clear search when opening
-          }}
+          onClick={() => setIsOpen((p) => !p)}
         >
-          {value.length === 0 && (
-            <span className="text-sm text-gray-400 truncate">
-              {placeholder}
-            </span>
+          {displayValues.length === 0 && (
+            <span className="text-sm text-gray-400">{placeholder}</span>
           )}
 
-          {/* ALL PILL */}
           {isAll && (
             <span className="px-2 py-1 text-xs bg-green-100 text-green-700 rounded">
               All
             </span>
           )}
 
-          {/* NORMAL PILLS */}
           {!isAll && (
-            <div className="flex items-center gap-1 flex-1 min-w-0 overflow-hidden">
+            <div className="flex items-center gap-1 flex-1 overflow-hidden">
               {visibleValues.map((val) => (
                 <span
                   key={val}
-                  className="flex items-center gap-1 px-2 py-1 text-xs bg-blue-100 text-blue-700 rounded max-w-[120px] truncate"
+                  className="flex items-center gap-1 px-2 py-1 text-xs bg-blue-100 text-blue-700 rounded"
                 >
-                  <span className="truncate">{val}</span>
+                  {val}
+
                   {!singleSelect && (
                     <X
                       size={12}
-                      className="cursor-pointer"
                       onClick={(e) => {
                         e.stopPropagation();
-                        const updated = tempValue.filter((v) => v !== val);
+
+                        const updated = displayValues.filter((v) => v !== val);
+
                         setTempValue(updated);
                         onChange(updated);
+                        setSearch("");
                       }}
                     />
                   )}
@@ -175,44 +189,40 @@ export function MultiSelect({
       {/* DROPDOWN */}
       {isOpen && (
         <div className="absolute z-[1000] mt-1 w-[260px] bg-white border border-gray-200 rounded-lg shadow-lg max-h-[450px] flex flex-col">
-          {/* HEADER */}
-          <div className="sticky top-0 bg-white border-b z-10">
-            {searchable && (
-              <div className="p-2">
-                <input
-                  type="text"
-                  className="w-full px-2 py-1 text-sm border border-gray-200 rounded outline-none"
-                  placeholder="Search..."
-                  value={search}
-                  onChange={(e) => setSearch(e.target.value)}
-                />
-              </div>
-            )}
-
-            {!singleSelect && (
-              <div className="px-2 pb-2 flex justify-end">
-                <button
-                  onClick={applySelection}
-                  className="px-3 py-1 text-sm bg-blue-600 text-white rounded hover:bg-blue-700 cursor-pointer"
-                >
-                  OK
-                </button>
-              </div>
-            )}
-          </div>
-
-          {/* OPTIONS */}
-          <div className="flex-1 overflow-y-auto">
-            {!singleSelect && (
-              <div
-                className="px-3 py-2 text-sm cursor-pointer hover:bg-blue-50 flex items-center gap-2 border-b"
-                onClick={toggleSelectAll}
+          {!singleSelect && (
+            <div className="p-2 flex justify-end">
+              <button
+                onClick={applySelection}
+                className="px-3 py-1 text-sm bg-blue-600 text-white rounded"
               >
-                <input type="checkbox" readOnly checked={allSelected} />
-                {selectAllLabel}
-              </div>
-            )}
+                OK
+              </button>
+            </div>
+          )}
 
+          {searchable && (
+            <div className="p-2">
+              <input
+                type="text"
+                className="w-full px-2 py-1 text-sm border border-gray-200 rounded outline-none"
+                placeholder="Search..."
+                value={search}
+                onChange={(e) => setSearch(e.target.value)}
+              />
+            </div>
+          )}
+
+          {!singleSelect && (
+            <div
+              className="px-3 py-2 text-sm cursor-pointer border-t hover:bg-blue-50 flex items-center gap-2 border-b"
+              onClick={toggleSelectAll}
+            >
+              <input type="checkbox" readOnly checked={allSelected} />
+              {selectAllLabel}
+            </div>
+          )}
+
+          <div className="flex-1 overflow-y-auto">
             {filteredOptions.map((option) => (
               <div
                 key={option}
@@ -227,12 +237,6 @@ export function MultiSelect({
                 <span className="truncate">{option}</span>
               </div>
             ))}
-
-            {filteredOptions.length === 0 && (
-              <div className="px-3 py-2 text-sm text-gray-500">
-                No results found
-              </div>
-            )}
           </div>
         </div>
       )}

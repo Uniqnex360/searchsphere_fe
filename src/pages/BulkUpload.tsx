@@ -10,7 +10,6 @@ import AppTable from "../components/AppTable";
 import DateRangePicker from "../components/DateRangePicker";
 
 const BulkUpload = () => {
-
   const [searchParams] = useSearchParams();
   const startDate = searchParams.get("startDate") || "";
   const endDate = searchParams.get("endDate") || "";
@@ -55,6 +54,34 @@ const BulkUpload = () => {
     {
       key: "status",
       label: "Status",
+      render: (_: any, row: any) => {
+        const status = row?.status?.toLowerCase();
+
+        const statusStyles: Record<string, string> = {
+          success: "bg-green-100 text-green-700",
+          failure: "bg-red-100 text-red-700",
+          peding: "bg-yellow-100 text-yellow-700",
+          started: "bg-orange-100 text-orange-700",
+        };
+
+        const statusText: Record<string, string> = {
+          success: "Completed",
+          failure: "Failed",
+          started: "partially completed",
+          peding: "Pending",
+        };
+
+        const style =
+          statusStyles[status] || "bg-gray-100 text-gray-700 round-xl";
+
+        return (
+          <span
+            className={`px-3 py-1 rounded-xl text-xs font-medium capitalize ${style}`}
+          >
+            {statusText[status] || "--"}
+          </span>
+        );
+      },
     },
     {
       key: "rows",
@@ -99,7 +126,7 @@ const BulkUpload = () => {
         </div>
 
         <div className="flex gap-4">
-          <DateRangePicker/>
+          <DateRangePicker />
           <label
             className={`flex items-center gap-2 px-4 py-2 border border-gray-300 text-gray-700 rounded-lg hover:bg-gray-50 transition-colors cursor-pointer ${
               mutation.status === "pending"

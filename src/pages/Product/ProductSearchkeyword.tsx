@@ -1,7 +1,7 @@
 import { useState } from "react";
 import { useQuery } from "@tanstack/react-query";
 import { useSearchParams, useNavigate } from "react-router-dom";
-import { Eye, SearchIcon, X } from "lucide-react";
+import { SearchIcon, X } from "lucide-react";
 
 import AppTable from "../../components/AppTable";
 import AppPagination from "../../components/AppPagination";
@@ -65,11 +65,6 @@ const ProductSearchKeyword = () => {
     setSearchParams(updated);
   };
 
-  const handleOpenModal = (row: any) => {
-    if (!row) return;
-    setSelectedRow(row);
-    setViewModal(true);
-  };
 
   const handleCloseModal = () => {
     setViewModal(false);
@@ -123,7 +118,9 @@ const ProductSearchKeyword = () => {
                 urlParams.delete("isKeyword");
                 if (startDate) urlParams.set("startDate", startDate);
                 if (endDate) urlParams.set("endDate", endDate);
-                navigate(`/product/search/keyword/result/${row.id}?${urlParams.toString()}&isKeyword=true`);
+                navigate(
+                  `/product/search/keyword/result/${row.id}?${urlParams.toString()}&isKeyword=true`,
+                );
               } catch (e) {
                 console.error("Invalid URL:", row.url);
               }
@@ -146,21 +143,39 @@ const ProductSearchKeyword = () => {
       label: "No of Result",
       render: (_: any, row: any) => row?.total_result ?? "--",
     },
+    // {
+    //   key: "actions",
+    //   label: "Actions",
+    //   width: "100px",
+    //   sortable: false,
+    //   render: (_: any, row: any) => (
+    //     <div
+    //       onClick={() => handleOpenModal(row)}
+    //       className="flex items-center justify-center cursor-pointer"
+    //     >
+    //       <button className="p-1 hover:bg-gray-100 text-gray-600 rounded transition-colors">
+    //         <Eye size={16} />
+    //       </button>
+    //     </div>
+    //   ),
+    // },
     {
-      key: "actions",
-      label: "Actions",
-      width: "100px",
-      sortable: false,
-      render: (_: any, row: any) => (
-        <div
-          onClick={() => handleOpenModal(row)}
-          className="flex items-center justify-center cursor-pointer"
-        >
-          <button className="p-1 hover:bg-gray-100 text-gray-600 rounded transition-colors">
-            <Eye size={16} />
-          </button>
-        </div>
-      ),
+      key: "created_at",
+      label: "Created At",
+      width: "180px",
+      render: (_: any, row: any) => {
+        if (!row?.created_at) return "--";
+
+        const date = new Date(row.created_at);
+
+        const formatted = date.toLocaleString("en-IN", {
+          day: "2-digit",
+          month: "short",
+          year: "numeric",
+        });
+
+        return <span className="text-sm text-gray-700">{formatted}</span>;
+      },
     },
   ];
 

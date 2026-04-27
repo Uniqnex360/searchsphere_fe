@@ -3,37 +3,32 @@ import { api } from "./axios";
 
 export const fetchProducts = async (filters: {
   q?: string;
-  brand?: string; // Changed from brands to brand to match backend expected key
-  category?: string;
-  product_type?: string;
+  brand?: string[]; // ✅ changed to array
+  category?: string[]; // ✅ changed to array
+  product_type?: string[]; // ✅ changed to array
   price_min?: number | null;
   price_max?: number | null;
   sortBy?: string;
   sortDirection?: string;
   page?: number;
-  attr_filters?: Record<string, string[]>; // The dynamic attributes dictionary
+  attr_filters?: Record<string, string[]>;
 }) => {
   const params: any = {};
 
-  // 1. Basic Search and Pagination
+  // 1. Basic
   if (filters.q) params.q = filters.q;
   if (filters.page) params.page = filters.page;
 
-  // 2. Standard Filters (passing as strings/comma-separated as per URL state)
-  if (filters.brand) params.brand = filters.brand;
-  if (filters.product_type) params.product_type = filters.product_type;
-  if (filters.category) params.category = filters.category;
+  // 2. Array filters (NO join ❌)
+  if (filters.brand?.length) params.brand = filters.brand;
+  if (filters.product_type?.length) params.product_type = filters.product_type;
+  if (filters.category?.length) params.category = filters.category;
 
-  // 3. Price Filters
-  if (filters.price_min !== null && filters.price_min !== undefined) {
-    params.price_min = filters.price_min;
-  }
-  if (filters.price_max !== null && filters.price_max !== undefined) {
-    params.price_max = filters.price_max;
-  }
+  // 3. Price
+  if (filters.price_min != null) params.price_min = filters.price_min;
+  if (filters.price_max != null) params.price_max = filters.price_max;
 
-  // 4. Handle Dynamic Attribute Filters
-  // Converts { Color: ["Red", "Blue"] } -> { attr_Color: "Red,Blue" }
+  // 4. Attributes (keep your existing logic)
   if (filters.attr_filters) {
     Object.entries(filters.attr_filters).forEach(([key, values]) => {
       if (values.length > 0) {
@@ -42,7 +37,7 @@ export const fetchProducts = async (filters: {
     });
   }
 
-  // 5. Sorting Logic
+  // 5. Sorting (same as your code)
   const sortMap: Record<string, { sort_by: string; sort_order: string }> = {
     "Sort by Views": { sort_by: "view_count", sort_order: "desc" },
     "Sort by Search Popularity": {
@@ -65,7 +60,6 @@ export const fetchProducts = async (filters: {
     "Low Reviews": { sort_by: "review", sort_order: "asc" },
   };
 
-  // Check if it's a raw key (from table headers) or a label (from dropdown)
   const rawSortKeys = [
     "brand",
     "category",
@@ -76,8 +70,7 @@ export const fetchProducts = async (filters: {
   ];
 
   if (filters.sortBy && rawSortKeys.includes(filters.sortBy)) {
-    params.sort_by =
-      filters.sortBy === "view_count" ? "view_count" : filters.sortBy;
+    params.sort_by = filters.sortBy;
     params.sort_order = filters.sortDirection || "desc";
   } else if (filters.sortBy && sortMap[filters.sortBy]) {
     params.sort_by = sortMap[filters.sortBy].sort_by;
@@ -87,7 +80,7 @@ export const fetchProducts = async (filters: {
     params.sort_order = "desc";
   }
 
-  // 6. API Call
+  // 🚀 6. API CALL (IMPORTANT FIX HERE)
   try {
     const res = await api.get("product/v6/list/", {
       params,
@@ -95,7 +88,25 @@ export const fetchProducts = async (filters: {
       headers: {
         "X-FE-URL": window.location.href,
       },
+
+      // ✅ THIS MAKES category[]=cables&category[]=tea cup
+      paramsSerializer: (params) => {
+        const searchParams = new URLSearchParams();
+
+        Object.entries(params).forEach(([key, value]) => {
+          if (Array.isArray(value)) {
+            value.forEach((v) => {
+              searchParams.append(`${key}[]`, v);
+            });
+          } else {
+            searchParams.append(key, value as any);
+          }
+        });
+
+        return searchParams.toString();
+      },
     });
+
     return res.data;
   } catch (error) {
     console.error("Error fetching products:", error);
