@@ -162,7 +162,7 @@ const AttributeSidebar = ({
                   </>
                 ) : (
                   <>
-                    <span>Show {sortedOptions.length - 10} More</span>
+                    <span>Show More</span>
                     <svg
                       className="w-3 h-3 ml-1"
                       fill="none"
@@ -414,27 +414,85 @@ export default function Search() {
     { key: "brand", label: "Brand", sortable: true },
     { key: "product_type", label: "Product Type", sortable: true },
     { key: "category", label: "Category", sortable: true },
+    // {
+    //   key: "review",
+    //   label: "Review",
+    //   sortable: true,
+    //   render: (_: any, row: ProductType) => {
+    //     const rating = Math.round(row?.review || 0); // or keep float logic if needed
+    //     const stars = 5;
+
+    //     return (
+    //       <div className="flex items-center gap-1">
+    //         {Array.from({ length: stars }).map((_, index) => (
+    //           <Star
+    //             key={index}
+    //             size={16}
+    //             className={
+    //               index < rating
+    //                 ? "text-yellow-400 fill-yellow-400"
+    //                 : "text-gray-300"
+    //             }
+    //           />
+    //         ))}
+    //       </div>
+    //     );
+    //   },
+    // },
     {
       key: "review",
       label: "Review",
       sortable: true,
       render: (_: any, row: ProductType) => {
-        const rating = Math.round(row?.review || 0); // or keep float logic if needed
-        const stars = 5;
+        // 1. Keep the raw decimal value (e.g., 1.25)
+        const rating = row?.review || 0;
+        const totalStars = 5;
 
         return (
-          <div className="flex items-center gap-1">
-            {Array.from({ length: stars }).map((_, index) => (
-              <Star
-                key={index}
-                size={16}
-                className={
-                  index < rating
-                    ? "text-yellow-400 fill-yellow-400"
-                    : "text-gray-300"
-                }
-              />
-            ))}
+          <div
+            className="flex items-center gap-1"
+            title={`${rating} out of 5 stars`}
+          >
+            {Array.from({ length: totalStars }).map((_, index) => {
+              // The "threshold" for this specific star (1, 2, 3, 4, 5)
+              const starIndex = index + 1;
+
+              // 2. Calculate the fill percentage for this individual star
+              let fillPercentage = 0;
+
+              if (rating >= starIndex) {
+                // Full star
+                fillPercentage = 100;
+              } else if (rating > starIndex - 1) {
+                // Partial star: Subtract the previous stars to get the remainder
+                // e.g., for 1.25, the 2nd star calculation is (1.25 - 1) * 100 = 25%
+                fillPercentage = (rating - (starIndex - 1)) * 100;
+              }
+
+              return (
+                <div key={index} className="relative inline-block">
+                  {/* Background Star (Empty/Gray) */}
+                  <Star size={16} className="text-gray-300 fill-gray-200" />
+
+                  {/* Foreground Star (Filled/Yellow) */}
+                  {/* We use an absolute container with overflow-hidden to "clip" the star */}
+                  <div
+                    className="absolute top-0 left-0 overflow-hidden select-none pointer-events-none"
+                    style={{ width: `${fillPercentage}%` }}
+                  >
+                    <Star
+                      size={16}
+                      className="text-yellow-400 fill-yellow-400"
+                    />
+                  </div>
+                </div>
+              );
+            })}
+
+            {/* Optional: Show the number next to stars for accessibility */}
+            <span className="text-xs text-gray-500 ml-1">
+              {rating.toFixed(2)}
+            </span>
           </div>
         );
       },
