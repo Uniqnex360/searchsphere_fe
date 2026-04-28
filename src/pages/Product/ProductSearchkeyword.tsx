@@ -89,6 +89,10 @@ const ProductSearchKeyword = () => {
     }
   };
 
+  const normalizeForES = (dateStr: string) => {
+    return new Date(dateStr).toISOString().slice(0, 23);
+  };
+
   const columns = [
     {
       key: "q",
@@ -126,11 +130,11 @@ const ProductSearchKeyword = () => {
                 const urlParams = new URLSearchParams(urlObj.search);
                 urlParams.delete("isKeyword");
 
-                if (startDate) urlParams.set("startDate", startDate);
-                if (endDate) urlParams.set("endDate", endDate);
+                // if (startDate) urlParams.set("startDate", startDate);
+                // if (endDate) urlParams.set("endDate", endDate);
 
                 navigate(
-                  `/product?${urlParams.toString()}&isKeyword=true&end_date=${row?.created_at}`,
+                  `/product?${urlParams.toString()}&isKeyword=true&end_date=${normalizeForES(row?.created_at)}`,
                 );
               } catch (e) {
                 console.error("Invalid URL:", row.url);

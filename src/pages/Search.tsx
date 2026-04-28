@@ -45,7 +45,7 @@ const AttributeSidebar = ({
   };
 
   // 1. List of keys to exclude from the dynamic attributes display
-  const excludeList = ["brand", "category", "product type", "product category"];
+  const excludeList = ["brand", "category", "product type", "product category", "# manufacturer number"];
 
   // 2. List of keys that should be pushed to the very bottom of the sidebar
   const moveToEndList = [
@@ -497,6 +497,7 @@ export default function Search() {
         );
       },
     },
+    { key: "score", label: "Match Score" },
     {
       key: "actions",
       label: "Actions",
@@ -610,6 +611,7 @@ export default function Search() {
             <div className="flex items-center justify-center border border-gray-200 rounded-lg p-2 h-[42px] w-[42px]">
               <MultiSelect
                 options={priceRanges.map((r) => r.label)}
+                searchable={false}
                 value={
                   filters.price_min
                     ? [`$${filters.price_min} - $${filters.price_max}`]
@@ -647,6 +649,7 @@ export default function Search() {
                   "Oldest products",
                   "Top Reviews",
                 ]}
+                searchable={false}
                 value={filters.sortBy ? [filters.sortBy] : []}
                 onChange={(v) =>
                   updateParams({ sortBy: v[0] || "", page: "1" })
