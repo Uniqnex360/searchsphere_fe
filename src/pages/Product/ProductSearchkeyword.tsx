@@ -4,7 +4,7 @@ import { useSearchParams, useNavigate } from "react-router-dom";
 import { SearchIcon, X } from "lucide-react";
 
 import AppTable from "../../components/AppTable";
-// import AppPagination from "../../components/AppPagination";
+import AppPagination from "../../components/AppPagination";
 import AppModal from "../../components/AppModal";
 import { fetchProductSearchKeyword } from "../../api/product";
 import DateRangePicker from "../../components/DateRangePicker";
@@ -16,7 +16,7 @@ const ProductSearchKeyword = () => {
   const [viewModal, setViewModal] = useState(false);
   const [selectedRow, setSelectedRow] = useState<any>(null);
   const [sortKey, setSortKey] = useState<string>("");
-  const [sortDirection, setSortDirection] = useState<"asc" | "desc">("asc");
+  const [sortDirection, setSortDirection] = useState<"asc" | "desc">("desc");
 
   const [searchParams, setSearchParams] = useSearchParams();
   const params = Object.fromEntries(searchParams.entries());
@@ -208,6 +208,11 @@ const ProductSearchKeyword = () => {
               <AppCustomCalendar />
               <DateRangePicker />
             </div>
+
+            <div className="flex flex-col items-center justify-center gap-2 text-sm text-gray-600">
+              <p>Total keywords : {listData?.meta?.total}</p>
+              <p>Unique keyword : {listData?.meta?.unique}</p>
+            </div>
           </div>
         </div>
 
@@ -276,6 +281,17 @@ const ProductSearchKeyword = () => {
             )}
           </div>
         </div>
+        <div className="flex justify-end mt-2">
+          <AppPagination
+            total={listData?.meta?.unique || 0}
+            page={page}
+            size={listData?.meta?.limit || 50}
+            onPageChange={(p) => {
+              updateParams({ page: String(p) });
+              window.scrollTo({ top: 0, behavior: "smooth" });
+            }}
+          />
+        </div>
 
         {/* TABLE */}
         <div className="p-8 space-y-4">
@@ -286,6 +302,17 @@ const ProductSearchKeyword = () => {
             sortKey={sortKey}
             sortDirection={sortDirection}
             onSort={handleSort}
+          />
+        </div>
+        <div className="flex justify-end my-2">
+          <AppPagination
+            total={listData?.meta?.unique || 0}
+            page={page}
+            size={listData?.meta?.limit || 50}
+            onPageChange={(p) => {
+              updateParams({ page: String(p) });
+              window.scrollTo({ top: 0, behavior: "smooth" });
+            }}
           />
         </div>
       </div>
