@@ -40,6 +40,7 @@ type ProductAttribute = {
 export type ProductType = {
   id?: number | string;
   name?: string;
+  score?: number;
   product_name: string;
   brand: Brand;
   industry: Industry;

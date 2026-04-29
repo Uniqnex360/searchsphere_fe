@@ -45,7 +45,13 @@ const AttributeSidebar = ({
   };
 
   // 1. List of keys to exclude from the dynamic attributes display
-  const excludeList = ["brand", "category", "product type", "product category", "# manufacturer number"];
+  const excludeList = [
+    "brand",
+    "category",
+    "product type",
+    "product category",
+    "# manufacturer number",
+  ];
 
   // 2. List of keys that should be pushed to the very bottom of the sidebar
   const moveToEndList = [
@@ -368,6 +374,13 @@ export default function Search() {
     updateParams({ q: value, page: "1" });
   };
 
+  const maxScore = productList?.data?.max_score || 1;
+
+  const normalizedScore = (score: number) => {
+    if (!maxScore) return 0;
+    return ((score / maxScore) * 5).toFixed(2);
+  };
+
   const columns = [
     {
       key: "image",
@@ -497,7 +510,20 @@ export default function Search() {
         );
       },
     },
-    { key: "score", label: "Match Score" },
+    {
+      key: "score",
+      label: "Match Score",
+      render: (_: any, row: ProductType) => {
+        const score = row?.score || 0;
+        const normalized = normalizedScore(score);
+
+        return (
+          <span className="text-sm font-medium text-gray-700">
+            {normalized}
+          </span>
+        );
+      },
+    },
     {
       key: "actions",
       label: "Actions",
