@@ -3,7 +3,7 @@ import {
   List,
   LayoutGrid,
   Eye,
-  DollarSign,
+  // DollarSign,
   ArrowDownUp,
   Star,
 } from "lucide-react";
@@ -13,7 +13,7 @@ import { AutoComplete } from "../components/AutoComplete";
 import { MultiSelect } from "../components/MultiSelect";
 import {
   fetchProducts,
-  fetchProductsFilterMeta,
+  // fetchProductsFilterMeta,
   fetchAutosuggestV6,
 } from "../api/product";
 import AppPagination from "../components/AppPagination";
@@ -257,21 +257,21 @@ export default function Search() {
     setSearchInput(filters.q);
   }, [filters.q]);
 
-  const [priceRanges, setPriceRanges] = useState<
-    { min: number; max: number; label: string }[]
-  >([]);
+  // const [priceRanges, setPriceRanges] = useState<
+  //   { min: number; max: number; label: string }[]
+  // >([]);
 
-  useEffect(() => {
-    (async () => {
-      const res = await fetchProductsFilterMeta();
-      const priceOpts =
-        res?.price_ranges?.map((r: any) => ({
-          ...r,
-          label: `$${r.min.toLocaleString()} - $${r.max.toLocaleString()}`,
-        })) || [];
-      setPriceRanges(priceOpts);
-    })();
-  }, []);
+  // useEffect(() => {
+  //   (async () => {
+  //     const res = await fetchProductsFilterMeta();
+  //     const priceOpts =
+  //       res?.price_ranges?.map((r: any) => ({
+  //         ...r,
+  //         label: `$${r.min.toLocaleString()} - $${r.max.toLocaleString()}`,
+  //       })) || [];
+  //     // setPriceRanges(priceOpts);
+  //   })();
+  // }, []);
 
   useEffect(() => {
     const t = setTimeout(() => {
@@ -608,7 +608,7 @@ export default function Search() {
             placeholder="Filter by category"
           />
           <div className="flex items-center gap-1 w-fit justify-self-start">
-            <div className="flex items-center justify-center border border-gray-200 rounded-lg p-2 h-[42px] w-[42px]">
+            {/* <div className="flex items-center justify-center border border-gray-200 rounded-lg p-2 h-[42px] w-[42px]">
               <MultiSelect
                 options={priceRanges.map((r) => r.label)}
                 searchable={false}
@@ -629,7 +629,7 @@ export default function Search() {
                 triggerType="icon"
                 icon={<DollarSign size={18} />}
               />
-            </div>
+            </div> */}
             <div className="flex items-center justify-center border border-gray-200 rounded-lg p-2 h-[42px] w-[42px]">
               <MultiSelect
                 options={[

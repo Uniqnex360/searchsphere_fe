@@ -228,7 +228,7 @@ export const fetchAutosuggestV6 = async (filters: { q?: string }) => {
 };
 
 export const fetchProductsFilterMeta = async () => {
-  const res = await api.get("/product/filter-meta/");
+  const res = await api.get("/product/filter-meta/", {timeout: 0});
   return res.data;
 };
 
