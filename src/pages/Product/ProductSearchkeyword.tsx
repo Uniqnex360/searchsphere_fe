@@ -32,6 +32,7 @@ const ProductSearchKeyword = () => {
   const brands = params.brand || "";
   const categories = params.category || "";
   const productTypes = params.product_type || "";
+  const heading = params.heading || "Product Search Keywords";
 
   const isKeyword = searchParams.get("fromDashboard") === "true";
 
@@ -195,7 +196,7 @@ const ProductSearchKeyword = () => {
             )}
             <div>
               <h1 className="text-2xl font-bold text-gray-800">
-                Product Search Keywords
+                {heading}
               </h1>
               <p className="text-sm text-gray-500">
                 Track user search queries and results

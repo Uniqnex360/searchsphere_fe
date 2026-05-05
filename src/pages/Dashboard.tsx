@@ -25,6 +25,7 @@ export default function SearchDashboard() {
     sub?: string,
     color?: string,
     navigateStr?: string,
+    heading?: string,
   ) => (
     <div
       className="bg-white cursor-pointer rounded-xl shadow-sm p-4 border border-gray-200 hover:shadow-md transition"
@@ -40,8 +41,8 @@ export default function SearchDashboard() {
 
           navigate(
             queryString
-              ? `${path}?${queryString}&fromDashboard=${true}`
-              : `${path}?fromDashboard=${true}`,
+              ? `${path}?${queryString}&fromDashboard=${true}&heading=${heading}`
+              : `${path}?fromDashboard=${true}&heading=${heading}`,
           );
         }
       }}
@@ -101,6 +102,7 @@ export default function SearchDashboard() {
               undefined,
               undefined,
               "/product/search/keyword",
+              "Product Search Keywords",
             )}
 
             {kpiCard(
@@ -109,6 +111,7 @@ export default function SearchDashboard() {
               undefined,
               undefined,
               "/product/search/keyword",
+              "Unique Search Keywords",
             )}
 
             {kpiCard(
@@ -124,6 +127,7 @@ export default function SearchDashboard() {
               }% success`,
               "text-green-600",
               "/product/search/keyword?type=non_zero",
+              "Successful Search Keywords",
             )}
 
             {kpiCard(
@@ -132,6 +136,7 @@ export default function SearchDashboard() {
               `${data.failure_rate_percent}% failure`,
               "text-red-500",
               "/product/search/keyword?type=zero",
+              "Zero Result Searches",
             )}
 
             {kpiCard(
@@ -145,6 +150,7 @@ export default function SearchDashboard() {
               undefined,
               undefined,
               "/product/search/keyword?type=non_zero",
+              "Unique Success Keywords",
             )}
 
             {kpiCard(
@@ -153,6 +159,7 @@ export default function SearchDashboard() {
               undefined,
               undefined,
               "/product/search/keyword?type=zero",
+              "Zero Result Keywords",
             )}
           </div>
 

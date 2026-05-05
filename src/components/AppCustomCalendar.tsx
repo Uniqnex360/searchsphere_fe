@@ -25,15 +25,19 @@ const OPTIONS: Option[] = [
   { label: "Last Year", key: "last_year" },
 ];
 
+// ✅ FIX: safe local date formatting (NO timezone shift)
 function formatDate(date: Date) {
-  return date.toISOString().split("T")[0]; // ✅ YYYY-MM-DD only
+  const y = date.getFullYear();
+  const m = String(date.getMonth() + 1).padStart(2, "0");
+  const d = String(date.getDate()).padStart(2, "0");
+  return `${y}-${m}-${d}`;
 }
 
 function getDateRange(key: string) {
   const now = new Date();
 
-  const start = new Date(now);
-  const end = new Date(now);
+  let start = new Date(now);
+  let end = new Date(now);
 
   switch (key) {
     case "today":
@@ -42,8 +46,12 @@ function getDateRange(key: string) {
       break;
 
     case "yesterday":
+      start = new Date(now);
+      end = new Date(now);
+
       start.setDate(now.getDate() - 1);
       start.setHours(0, 0, 0, 0);
+
       end.setDate(now.getDate() - 1);
       end.setHours(23, 59, 59, 999);
       break;
@@ -51,8 +59,13 @@ function getDateRange(key: string) {
     case "this_week": {
       const day = now.getDay();
       const diff = now.getDate() - day + (day === 0 ? -6 : 1);
+
+      start = new Date(now);
+      end = new Date(now);
+
       start.setDate(diff);
       start.setHours(0, 0, 0, 0);
+
       end.setHours(23, 59, 59, 999);
       break;
     }
@@ -60,70 +73,131 @@ function getDateRange(key: string) {
     case "last_week": {
       const day = now.getDay();
       const diff = now.getDate() - day - 6;
+
+      start = new Date(now);
+      end = new Date(now);
+
       start.setDate(diff);
       start.setHours(0, 0, 0, 0);
+
       end.setDate(diff + 6);
       end.setHours(23, 59, 59, 999);
       break;
     }
 
     case "last_7_days":
+      start = new Date(now);
+      end = new Date(now);
+
       start.setDate(now.getDate() - 7);
+      start.setHours(0, 0, 0, 0);
+
+      end.setHours(23, 59, 59, 999);
       break;
 
     case "last_14_days":
+      start = new Date(now);
+      end = new Date(now);
+
       start.setDate(now.getDate() - 14);
+      start.setHours(0, 0, 0, 0);
+
+      end.setHours(23, 59, 59, 999);
       break;
 
     case "last_30_days":
+      start = new Date(now);
+      end = new Date(now);
+
       start.setDate(now.getDate() - 30);
+      start.setHours(0, 0, 0, 0);
+
+      end.setHours(23, 59, 59, 999);
       break;
 
     case "last_60_days":
+      start = new Date(now);
+      end = new Date(now);
+
       start.setDate(now.getDate() - 60);
+      start.setHours(0, 0, 0, 0);
+
+      end.setHours(23, 59, 59, 999);
       break;
 
     case "last_90_days":
+      start = new Date(now);
+      end = new Date(now);
+
       start.setDate(now.getDate() - 90);
+      start.setHours(0, 0, 0, 0);
+
+      end.setHours(23, 59, 59, 999);
       break;
 
     case "this_month":
+      start = new Date(now);
+      end = new Date(now);
+
       start.setDate(1);
       start.setHours(0, 0, 0, 0);
+      end.setHours(23, 59, 59, 999);
       break;
 
     case "last_month":
+      start = new Date(now);
+      end = new Date(now);
+
       start.setMonth(now.getMonth() - 1, 1);
-      end.setMonth(now.getMonth(), 0);
       start.setHours(0, 0, 0, 0);
+
+      end.setMonth(now.getMonth(), 0);
       end.setHours(23, 59, 59, 999);
       break;
 
     case "this_quarter": {
       const q = Math.floor(now.getMonth() / 3);
-      start.setMonth(q * 3, 1);
-      start.setHours(0, 0, 0, 0);
-      break;
-    }
 
-    case "last_quarter": {
-      const q = Math.floor(now.getMonth() / 3) - 1;
+      start = new Date(now);
+      end = new Date(now);
+
       start.setMonth(q * 3, 1);
-      end.setMonth(q * 3 + 3, 0);
       start.setHours(0, 0, 0, 0);
       end.setHours(23, 59, 59, 999);
       break;
     }
 
+    case "last_quarter": {
+      const q = Math.floor(now.getMonth() / 3) - 1;
+
+      start = new Date(now);
+      end = new Date(now);
+
+      start.setMonth(q * 3, 1);
+      start.setHours(0, 0, 0, 0);
+
+      end.setMonth(q * 3 + 3, 0);
+      end.setHours(23, 59, 59, 999);
+      break;
+    }
+
     case "this_year":
+      start = new Date(now);
+      end = new Date(now);
+
       start.setMonth(0, 1);
       start.setHours(0, 0, 0, 0);
+      end.setHours(23, 59, 59, 999);
       break;
 
     case "last_year":
+      start = new Date(now);
+      end = new Date(now);
+
       start.setFullYear(now.getFullYear() - 1, 0, 1);
-      end.setFullYear(now.getFullYear() - 1, 11, 31);
       start.setHours(0, 0, 0, 0);
+
+      end.setFullYear(now.getFullYear() - 1, 11, 31);
       end.setHours(23, 59, 59, 999);
       break;
   }
@@ -137,9 +211,9 @@ function getDateRange(key: string) {
 export default function AppCustomCalendar() {
   const [searchParams, setSearchParams] = useSearchParams();
 
-  const [selected, setSelected] = useState<Option | null>(null); // ✅ FIX
-  const [open, setOpen] = useState(false); // ✅ FIX
-  const ref = useRef<HTMLDivElement>(null); // ✅ FIX
+  const [selected, setSelected] = useState<Option | null>(null);
+  const [open, setOpen] = useState(false);
+  const ref = useRef<HTMLDivElement>(null);
 
   const handleChange = (opt: Option) => {
     setSelected(opt);
@@ -156,7 +230,6 @@ export default function AppCustomCalendar() {
     setOpen(false);
   };
 
-  // ✅ close outside click
   useEffect(() => {
     const handler = (e: MouseEvent) => {
       if (ref.current && !ref.current.contains(e.target as Node)) {
@@ -169,7 +242,6 @@ export default function AppCustomCalendar() {
 
   return (
     <div className="relative w-64" ref={ref}>
-      {/* TRIGGER */}
       <div
         onClick={() => setOpen((p) => !p)}
         className="flex items-center justify-between px-4 py-2 bg-white border border-gray-200 rounded-xl shadow-sm cursor-pointer hover:border-gray-300 transition"
@@ -186,7 +258,6 @@ export default function AppCustomCalendar() {
         />
       </div>
 
-      {/* DROPDOWN */}
       {open && (
         <div className="absolute z-50 mt-2 w-full bg-white border border-gray-200 rounded-xl shadow-lg max-h-64 overflow-y-auto">
           {OPTIONS.map((opt) => (
