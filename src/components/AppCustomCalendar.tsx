@@ -42,8 +42,11 @@ function getDateRange(key: string) {
   switch (key) {
     case "today":
       start.setHours(0, 0, 0, 0);
-      end.setHours(23, 59, 59, 999);
-      break;
+
+      return {
+        startDate: formatDate(start),
+        endDate: "",
+      };
 
     case "yesterday":
       start = new Date(now);
@@ -61,13 +64,14 @@ function getDateRange(key: string) {
       const diff = now.getDate() - day + (day === 0 ? -6 : 1);
 
       start = new Date(now);
-      end = new Date(now);
 
       start.setDate(diff);
       start.setHours(0, 0, 0, 0);
 
-      end.setHours(23, 59, 59, 999);
-      break;
+      return {
+        startDate: formatDate(start),
+        endDate: "",
+      };
     }
 
     case "last_week": {
@@ -87,62 +91,68 @@ function getDateRange(key: string) {
 
     case "last_7_days":
       start = new Date(now);
-      end = new Date(now);
 
       start.setDate(now.getDate() - 7);
       start.setHours(0, 0, 0, 0);
 
-      end.setHours(23, 59, 59, 999);
-      break;
+      return {
+        startDate: formatDate(start),
+        endDate: "",
+      };
 
     case "last_14_days":
       start = new Date(now);
-      end = new Date(now);
 
       start.setDate(now.getDate() - 14);
       start.setHours(0, 0, 0, 0);
 
-      end.setHours(23, 59, 59, 999);
-      break;
+      return {
+        startDate: formatDate(start),
+        endDate: "",
+      };
 
     case "last_30_days":
       start = new Date(now);
-      end = new Date(now);
 
       start.setDate(now.getDate() - 30);
       start.setHours(0, 0, 0, 0);
 
-      end.setHours(23, 59, 59, 999);
-      break;
+      return {
+        startDate: formatDate(start),
+        endDate: "",
+      };
 
     case "last_60_days":
       start = new Date(now);
-      end = new Date(now);
 
       start.setDate(now.getDate() - 60);
       start.setHours(0, 0, 0, 0);
 
-      end.setHours(23, 59, 59, 999);
-      break;
+      return {
+        startDate: formatDate(start),
+        endDate: "",
+      };
 
     case "last_90_days":
       start = new Date(now);
-      end = new Date(now);
-
+      
       start.setDate(now.getDate() - 90);
       start.setHours(0, 0, 0, 0);
 
-      end.setHours(23, 59, 59, 999);
-      break;
+      return {
+        startDate: formatDate(start),
+        endDate: "",
+      };
 
     case "this_month":
       start = new Date(now);
-      end = new Date(now);
 
       start.setDate(1);
       start.setHours(0, 0, 0, 0);
-      end.setHours(23, 59, 59, 999);
-      break;
+      return {
+        startDate: formatDate(start),
+        endDate: "",
+      };
 
     case "last_month":
       start = new Date(now);
@@ -159,12 +169,13 @@ function getDateRange(key: string) {
       const q = Math.floor(now.getMonth() / 3);
 
       start = new Date(now);
-      end = new Date(now);
 
       start.setMonth(q * 3, 1);
       start.setHours(0, 0, 0, 0);
-      end.setHours(23, 59, 59, 999);
-      break;
+      return {
+        startDate: formatDate(start),
+        endDate: "",
+      };
     }
 
     case "last_quarter": {
@@ -187,8 +198,10 @@ function getDateRange(key: string) {
 
       start.setMonth(0, 1);
       start.setHours(0, 0, 0, 0);
-      end.setHours(23, 59, 59, 999);
-      break;
+      return {
+        startDate: formatDate(start),
+        endDate: "",
+      };
 
     case "last_year":
       start = new Date(now);
@@ -223,7 +236,13 @@ export default function AppCustomCalendar() {
     const params = Object.fromEntries(searchParams.entries());
 
     params.startDate = startDate;
-    params.endDate = endDate;
+
+    if (endDate) {
+      params.endDate = endDate;
+    } else {
+      delete params.endDate;
+    }
+
     params.page = "1";
 
     setSearchParams(params);
