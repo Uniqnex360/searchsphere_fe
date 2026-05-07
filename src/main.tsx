@@ -38,14 +38,14 @@ export const shopifyApp =
  * 🚨 IMPORTANT: trigger OAuth flow
  * Shopify does NOT call /auth automatically
  */
-if (shop && shopifyApp) {
+if (shop) {
   const redirect = Redirect.create(shopifyApp);
 
   const backendUrl = import.meta.env.VITE_BACKEND_URL;
 
   redirect.dispatch(
     Redirect.Action.REMOTE,
-    `${backendUrl}/auth/?shop=${shop}`
+    `${backendUrl}/auth/?shop=${shop}&host=${host}`
   );
 }
 
