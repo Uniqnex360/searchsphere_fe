@@ -38,6 +38,7 @@ export const shopifyApp =
  * 🚨 IMPORTANT: trigger OAuth flow
  * Shopify does NOT call /auth automatically
  */
+console.log("show", shop, shopifyApp)
 if (shop) {
   //@ts-ignore
   const redirect = Redirect.create(shopifyApp);
