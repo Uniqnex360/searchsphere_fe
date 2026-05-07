@@ -39,6 +39,7 @@ export const shopifyApp =
  * Shopify does NOT call /auth automatically
  */
 if (shop) {
+  //@ts-ignore
   const redirect = Redirect.create(shopifyApp);
 
   const backendUrl = import.meta.env.VITE_BACKEND_URL;
