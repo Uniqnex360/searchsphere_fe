@@ -11,21 +11,20 @@
 //   </QueryClientProvider>,
 // );
 
-
 import { createRoot } from "react-dom/client";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { createApp } from "@shopify/app-bridge";
+import { Redirect } from "@shopify/app-bridge/actions";
 import "./index.css";
 import App from "./App.tsx";
 
 const queryClient = new QueryClient();
 
-// Get Shopify context from URL
 const urlParams = new URLSearchParams(window.location.search);
 const host = urlParams.get("host");
-// const shop = urlParams.get("shop");
+const shop = urlParams.get("shop");
 
-// Safe App Bridge initialization
+// Shopify App Bridge
 export const shopifyApp =
   host && import.meta.env.VITE_SHOPIFY_API_KEY
     ? createApp({
@@ -34,6 +33,21 @@ export const shopifyApp =
         forceRedirect: true,
       })
     : null;
+
+/**
+ * 🚨 IMPORTANT: trigger OAuth flow
+ * Shopify does NOT call /auth automatically
+ */
+if (shop && shopifyApp) {
+  const redirect = Redirect.create(shopifyApp);
+
+  const backendUrl = import.meta.env.VITE_BACKEND_URL;
+
+  redirect.dispatch(
+    Redirect.Action.REMOTE,
+    `${backendUrl}/auth/?shop=${shop}`
+  );
+}
 
 createRoot(document.getElementById("root")!).render(
   <QueryClientProvider client={queryClient}>
