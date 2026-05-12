@@ -4,13 +4,13 @@ import {
   LayoutGrid,
   Eye,
   // DollarSign,
-  ArrowDownUp,
   Star,
 } from "lucide-react";
 import { useQuery } from "@tanstack/react-query";
 import { useNavigate, useSearchParams } from "react-router-dom";
 import { AutoComplete } from "../components/AutoComplete";
 import { MultiSelect } from "../components/MultiSelect";
+import { AppSelect } from "../components/AppSelect";
 import {
   fetchProducts,
   // fetchProductsFilterMeta,
@@ -634,30 +634,7 @@ export default function Search() {
             placeholder="Filter by category"
           />
           <div className="flex items-center gap-1 w-fit justify-self-start">
-            {/* <div className="flex items-center justify-center border border-gray-200 rounded-lg p-2 h-[42px] w-[42px]">
-              <MultiSelect
-                options={priceRanges.map((r) => r.label)}
-                searchable={false}
-                value={
-                  filters.price_min
-                    ? [`$${filters.price_min} - $${filters.price_max}`]
-                    : []
-                }
-                onChange={(v) => {
-                  const selected = priceRanges.find((r) => r.label === v[0]);
-                  updateParams({
-                    price_min: selected?.min || "",
-                    price_max: selected?.max || "",
-                    page: "1",
-                  });
-                }}
-                singleSelect
-                triggerType="icon"
-                icon={<DollarSign size={18} />}
-              />
-            </div> */}
-            <div className="flex items-center justify-center border border-gray-200 rounded-lg p-2 h-[42px] w-[42px]">
-              <MultiSelect
+              <AppSelect
                 options={[
                   "Sort by Views",
                   "Sort by Search Popularity",
@@ -675,16 +652,14 @@ export default function Search() {
                   "Oldest products",
                   "Top Reviews",
                 ]}
-                searchable={false}
-                value={filters.sortBy ? [filters.sortBy] : []}
-                onChange={(v) =>
-                  updateParams({ sortBy: v[0] || "", page: "1" })
+                value={filters.sortBy || ""}
+                onChange={(value) =>
+                  updateParams({
+                    sortBy: value,
+                    page: "1",
+                  })
                 }
-                singleSelect
-                triggerType="icon"
-                icon={<ArrowDownUp size={18} />}
               />
-            </div>
           </div>
         </div>
 
